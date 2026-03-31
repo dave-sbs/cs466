@@ -1,34 +1,43 @@
 # Poetry as Multimodal Dream — Code
 
-Corpus exploration and preprocessing pipeline for *Poetry as Multimodal Dream: Corpus-Driven Visualization of Linguistic and Sonic Emergence* (CS466 Final Project).
+Pipeline for *Poetry as Multimodal Dream: Corpus-Driven Visualization of Linguistic and Sonic Emergence* (CS466 Final Project).
 
-## Overview
-
-This directory contains the data exploration and preprocessing work for Check-in 1. The goal is to select and characterize a set of poems from the Gutenberg Poetry Corpus that are well-suited for multimodal visualization — poems with rich environmental imagery, manageable length, and strong musicality.
+The system selects poems from the Gutenberg Poetry Corpus, retrieves semantically aligned nature images via CLIP + FAISS, and produces qualitative evaluation galleries for visual inspection — forming the foundation for dream-like video visualization.
 
 ## Project Structure
 
 ```
 code/
-├── constants.py              # Pre-computed poem length dictionary for the corpus
-├── exploration.py            # Initial ad-hoc exploration: length stats and manual sampling
-├── explore_corpus.py         # Systematic six-step corpus exploration pipeline (main script)
+├── constants.py              # Pre-computed poem length dictionary
+├── exploration.py            # Ad-hoc corpus stats and manual sampling
+├── explore_corpus.py         # Systematic corpus exploration pipeline
+├── download_images.py        # Download nature images from HuggingFace
+├── clip_pipeline.py          # CLIP embedding + FAISS retrieval pipeline
+├── evaluate_retrieval.py     # HTML gallery generator for qualitative evaluation
 ├── requirements.txt          # Python dependencies
-├── samples/                  # Ad-hoc manually pulled poem files for early review
-└── exploration_output/
-    ├── corpus_catalog.csv    # Per-poem metadata for all poems in the corpus
-    ├── shortlist.csv         # Ranked visualization candidates
-    ├── llm_prompts.json      # LLM analysis prompts (consolidated)
-    ├── plots/                # Diagnostic visualizations (PNG)
-    ├── prompts_individual/   # Per-poem LLM analysis prompts (TXT)
-    └── samples_stratified/   # Stratified poem samples + manifest.json
+├── data/
+│   ├── images/               # Downloaded images (not tracked in git)
+│   ├── embeddings.npy        # CLIP image embeddings (not tracked in git)
+│   ├── faiss_index.bin       # FAISS index (not tracked in git)
+│   └── image_ids.json        # Ordered list of image filenames
+├── exploration_output/
+│   ├── corpus_catalog.csv    # Per-poem metadata for all corpus poems
+│   ├── shortlist.csv         # Ranked visualization candidates
+│   ├── llm_prompts.json      # LLM analysis prompts (consolidated)
+│   ├── plots/                # Diagnostic visualizations (PNG)
+│   ├── prompts_individual/   # Per-poem LLM analysis prompts (TXT)
+│   └── samples_stratified/   # Stratified poem samples + manifest.json
+└── output/
+    ├── retrieval_results/    # Per-poem retrieved images (not tracked in git)
+    └── galleries/            # HTML evaluation galleries (not tracked in git)
 ```
 
-## Dataset
+## Datasets
 
-**Gutenberg Poetry Corpus** — `biglam/gutenberg-poetry-corpus` on Hugging Face.
-
-A large collection of public-domain poetry from Project Gutenberg, stored as a line-level Parquet file. The corpus spans thousands of unique works across a wide range of lengths, eras, and traditions.
+| Dataset | Source | Description |
+|---------|--------|-------------|
+| **Gutenberg Poetry Corpus** | `biglam/gutenberg-poetry-corpus` on HuggingFace | Public-domain poetry, stored as a line-level Parquet file. Streamed on first load — no manual download required. |
+| **Nature Image Dataset** | `mertcobanov/nature-dataset` on HuggingFace | ~50K nature/landscape images with captions. Downloaded locally to `data/images/`. |
 
 ## Setup
 
@@ -36,16 +45,18 @@ A large collection of public-domain poetry from Project Gutenberg, stored as a l
 pip install -r requirements.txt
 ```
 
-> The corpus is streamed directly from Hugging Face on first load — no manual download required.
+> On macOS, if you encounter an OpenMP conflict (`OMP: Error #15`), prefix commands with `KMP_DUPLICATE_LIB_OK=TRUE`.
 
-## Usage
+## Full Pipeline
 
-### Systematic Pipeline (`explore_corpus.py`)
+Run the steps in order:
 
-Run all six steps end-to-end:
+### Step 1 — Corpus Exploration
+
+Build the corpus catalog, generate stratified samples, and produce a ranked shortlist of visualization candidates:
 
 ```bash
-python explore_corpus.py
+python explore_corpus.py          # Run all steps end-to-end
 ```
 
 Or run individual steps:
@@ -58,33 +69,92 @@ python explore_corpus.py --step plots      # Generate diagnostic visualizations
 python explore_corpus.py --step shortlist  # Filter and rank visualization candidates
 ```
 
-#### Pipeline Steps
+**Outputs:** `exploration_output/shortlist.csv`, `exploration_output/corpus_catalog.csv`, `exploration_output/samples_stratified/`
 
-| Step | Output | Description |
-|------|--------|-------------|
-| `sample` | `samples_stratified/` | 5 poems per length bucket (9 buckets), saved to text files with a JSON manifest |
-| `catalog` | `corpus_catalog.csv` | Per-poem features: line/word count, type-token ratio, imagery density, estimated era |
-| `prompts` | `llm_prompts.json`, `prompts_individual/` | Structured prompts for LLM literary annotation of sampled poems |
-| `plots` | `plots/` | Length distribution histogram, bucket breakdown bar chart, catalog scatter/TTR plots |
-| `shortlist` | `shortlist.csv` | Poems ranked by `50×imagery_density + 30×TTR + 20×(100≤lines≤300)` |
+---
 
-### Initial Exploration (`exploration.py`)
+### Step 2 — Download Images
 
-A simpler script for quick ad-hoc analysis:
+Download nature images from HuggingFace to `data/images/`:
 
 ```bash
-python exploration.py
+python download_images.py                   # Download first 2000 images (default)
+python download_images.py --limit 500       # Smaller prototype set
+python download_images.py --limit 0         # Download all ~50K images
 ```
 
-Prints summary statistics (min, max, mean, median, percentiles, bucket counts) from the pre-computed length dictionary without loading the full corpus.
+The script is resumable — re-running skips already-downloaded images via `data/images/manifest.csv`.
+
+**Outputs:** `data/images/*.jpg`, `data/images/manifest.csv`
+
+---
+
+### Step 3 — Build CLIP Embeddings + FAISS Index
+
+Encode all images with CLIP and build a similarity index:
+
+```bash
+python clip_pipeline.py --step embed-images   # Encode images → data/embeddings.npy
+python clip_pipeline.py --step build-index    # Build FAISS index → data/faiss_index.bin
+```
+
+Or run both at once:
+
+```bash
+python clip_pipeline.py
+```
+
+**Outputs:** `data/embeddings.npy`, `data/image_ids.json`, `data/faiss_index.bin`
+
+---
+
+### Step 4 — Retrieve Images for a Poem
+
+Retrieve the top-K most visually similar images for each stanza of a poem:
+
+```bash
+# By Gutenberg ID (poem must be extracted first — see Step 1)
+python clip_pipeline.py --step retrieve --gutenberg_id 24449
+
+# By free-form text query
+python clip_pipeline.py --step retrieve --text "dark forest at dusk, mist rising"
+
+# With custom chunk size and top-K
+python clip_pipeline.py --step retrieve --gutenberg_id 24449 --top_k 10 --chunk_size 8
+```
+
+Poems are split into stanzas (or fixed-size chunks). Each chunk is encoded with CLIP's text encoder and queried against the FAISS index.
+
+**Outputs:** `output/retrieval_results/<poem_id>/`
+
+---
+
+### Step 5 — Qualitative Evaluation
+
+Generate self-contained HTML galleries for visual inspection of retrieval quality:
+
+```bash
+python evaluate_retrieval.py                          # All shortlisted poems
+python evaluate_retrieval.py --top_n 5                # Top 5 from shortlist
+python evaluate_retrieval.py --ids 24449 9825 36305   # Specific poems by ID
+python evaluate_retrieval.py --top_k 5 --chunk_size 6
+```
+
+Each gallery shows poem stanzas alongside their top-K retrieved images with cosine similarity scores. An `index.html` links all generated galleries.
+
+**Outputs:** `output/galleries/<poem_id>.html`, `output/galleries/index.html`
+
+---
 
 ## Poem Selection Criteria
 
-Target range for visualization candidates: **51–500 lines**.
+Target range: **51–500 lines**.
 
-Poems are filtered and scored by:
-- **Imagery density** (`imagery_word_count / line_count`) ≥ 0.03 — ensures rich environmental/nature vocabulary
-- **Type-token ratio** — favors vocabulary richness over repetition
+Poems are scored by:
+- **Imagery density** (`imagery_word_count / line_count`) ≥ 0.03 — rich environmental/nature vocabulary
+- **Type-token ratio** — vocabulary richness over repetition
 - **Length** — 100–300 lines receives a score bonus as the ideal visualization length
 
-The ranked `shortlist.csv` is the primary artifact for poem selection in subsequent pipeline stages.
+Ranking formula: `50×imagery_density + 30×TTR + 20×(100≤lines≤300)`
+
+The ranked `shortlist.csv` is the primary artifact for poem selection.
