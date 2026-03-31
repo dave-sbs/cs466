@@ -1,0 +1,481 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{xcolor}
+
+% Header and footer
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{CS466: Multimodal Learning}
+\lhead{Poetry as Multimodal Dream}
+\cfoot{\thepage}
+
+% Title formatting
+\title{\textbf{Poetry as Multimodal Dream: \\Visualizing Language, Sound, and Space through Corpus-Driven Emergence}}
+\author{
+  Team Members: Phillip Booth and Dave Boku \\
+  \textit{CS 466: Multimodal Interaction and Learning, Spring 2026}
+}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{center}
+  \small\textbf{GitHub:} \url{https://github.com/dave-sbs/poetry-multimodal-dream/}
+\end{center}
+
+\section*{Project Name}
+\textit{Poetry as Multimodal Dream: Corpus-Driven Visualization of Linguistic and Sonic Emergence}
+
+\section*{Problem Definition}
+
+Poetry is inherently visceral, yet computational treatments often isolate language from its sonic and visual dimensions. When a poem is spoken aloud, musicality, arising from prosody, meter, rhyme, and phonetic texture, transforms meaning. Similarly, the \textit{setting} of a poem (its implied world) shapes aesthetic experience but remains abstract, existing only in the reader's imagination.
+
+\subsection**{Core Research Problem}
+\textbf{Can we create a computational model that learns the relationships between:}
+\begin{enumerate}
+  \item \textbf{Textual semantics and form} (language, rhyme scheme, meter, thematic content)
+  \item \textbf{Sonic qualities} (prosody, pitch contours, rhythm, spectral texture from audio recordings)
+  \item \textbf{Visual/environmental essence} (the implied spatial and atmospheric context)
+\end{enumerate}
+
+\noindent And use these learned relationships to generate emergent, multimodal visualizations that make visceral the interplay of language, sound, and space?
+
+\subsection**{Artistic Vision}
+Inspired by Refik Anadol's work on data-driven visualization artworks - which use millions of images to create AI-generated "dreams", we propose to:
+\begin{enumerate}
+  \item Align poetry (as text and audio) to a large corpus of environmental and architectural images
+  \item Generate fluid, dream-like visualizations that reflect the poem's semantic content, emotional arc, and musicality
+  \item Create a \textit{visceral experience} where the poem transcends text and becomes a multisensory artwork
+\end{enumerate}
+
+\noindent The poem becomes a \textit{world}, and we make that world visible.
+
+\section*{Dataset}
+
+\subsection**{Textual Dataset}
+\begin{itemize}
+  \item \textbf{Corpus selection:} Classical and contemporary poetry (10–20 poems from diverse traditions: English Romantic, Classical, contemporary)
+  \item \textbf{Examples:} Keats, Shelley, Dante (translated), contemporary poets
+  \item \textbf{Selection criteria:} Poems with rich environmental imagery, varied musicality, and cultural significance
+  \item \textbf{Annotations:} Manual semantic analysis (thematic essence, emotional arc, key imagery terms per stanza)
+\end{itemize}
+
+\subsection**{Audio Dataset}
+\begin{itemize}
+  \item \textbf{Poetry readings:} Recorded performances by team members and/or sourced from public archives (e.g., Poetry Foundation, LibriVox)
+  \item \textbf{Multiple readings per poem:} Diverse interpretations to test alignment robustness
+  \item \textbf{Audio features extracted:} Pitch contours, spectral envelope, rhythm/stress patterns, intensity dynamics
+\end{itemize}
+
+\subsection**{Visual Corpus}
+\begin{itemize}
+  \item \textbf{Size:} 50,000–100,000 high-quality images focused on environments, architecture, landscapes, textures, and atmospheric scenes
+  \item \textbf{Sources:}
+  \begin{itemize}
+    \item Wikimedia Commons (~90M public domain/CC-BY images)
+    \item Unsplash (~4M free, high-quality)
+    \item Pexels (~3M free)
+    \item Google Open Images (subset with explicit CC licenses)
+  \end{itemize}
+  \item \textbf{Curation:} Filter for environmental/architectural imagery; remove faces and commercial products; focus on settings with atmospheric/evocative qualities
+  \item \textbf{Licensing:} All images CC-BY, public domain, or explicitly free-to-use; proper attribution maintained
+\end{itemize}
+
+\section*{Prior Work \& Related Research}
+
+\subsection**{Relevant Computational Approaches}
+\begin{enumerate}
+  \item \textbf{Vision-Language Models (CLIP):} Dense alignment between text and images via learned joint embeddings. Foundation for image retrieval from semantic queries.
+
+  \item \textbf{Prosody Analysis:} Audio feature extraction for understanding rhythm, pitch, stress, and emotional tone of speech. Libraries: \texttt{librosa}, \texttt{pyannote-audio}.
+
+  \item \textbf{Multimodal Fusion:} Learning representations that combine heterogeneous modalities (text, audio, images) for joint inference. Precedent: audio-visual speech recognition, video understanding models.
+
+  \item \textbf{Data-Driven Visual Synthesis:} Refik Anadol's approach uses large image corpora to generate emergent, dream-like visualizations. Neural interpolation and generative models enable fluid blending across visual space.
+
+  \item \textbf{Latent Space Dreaming:} Techniques like VAE interpolation and diffusion model conditioning allow generation of coherent visual sequences from sparse data.
+\end{enumerate}
+
+\subsection**{Novelty of This Work}
+While vision-language models exist, and prosody analysis is established, the \textit{integration} of sonic, semantic, and visual modalities to create poetry visualization is unexplored. Our contribution:
+\begin{itemize}
+  \item Novel multimodal alignment strategy that goes beyond literal keyword matching (semantic embedding + musicality weighting)
+  \item Demonstration that audio prosody can guide visual dynamics (pitch → image selection; rhythm → transition timing)
+  \item Empirical study of how emergent, corpus-derived visualization affects aesthetic experience and comprehension of poetry
+\end{itemize}
+
+\section*{Relation to Multimodal Interaction and Learning}
+
+This project engages all five multimodal challenges defined in contemporary literature:
+
+\begin{enumerate}
+  \item \textbf{Representation:} Learning a shared embedding space across text, audio, and image. Poetry's semantic and sonic essence must be encoded such that visually similar imagery emerges in retrieval.
+
+  \item \textbf{Translation:} Mapping abstract prosodic properties (pitch, rhythm) to visual dynamics (image selection, blend speed, color saturation). The audio doesn't literally describe the images; instead, its 'form' shapes how images are presented.
+
+  \item \textbf{Alignment:} Matching poem structure (lines, stanzas) and audio segments to retrieved image sequences. Temporal and thematic alignment ensures coherence.
+
+  \item \textbf{Fusion:} Combining text embeddings + prosodic features + image embeddings to jointly predict which images best represent a poem stanza, and how to present them.
+
+  \item \textbf{Co-learning:} The model learns interdependencies: a poem's rhythm influences which images resonate; visual texture informs sonic interpretation. Knowledge transfers across modalities.
+\end{enumerate}
+
+\noindent Beyond technical multimodality, this is fundamentally about \textbf{human-AI interaction}: creating an experience where humans and AI collaboratively realize poetry's latent visual dimension.
+
+\section*{Approach (High-Level)}
+
+\subsection**{System Pipeline}
+
+\begin{enumerate}
+  \item \textbf{Input:} Poem text + audio recording of recitation
+
+  \item \textbf{Semantic Extraction:}
+  \begin{itemize}
+    \item NLP-based theme detection (e.g., "isolation," "nature," "transcendence"). Use concrete and abstract nouns
+    \item Manual annotation of key imagery and emotional arc per stanza
+    \item Generate semantic embeddings (using CLIP text encoder or fine-tuned poetry-specific encoder)
+  \end{itemize}
+
+  \item \textbf{Prosody Analysis:}
+  \begin{itemize}
+    \item Extract pitch contours, spectral envelope, rhythm/stress patterns, intensity dynamics using \texttt{librosa}
+    \item Align audio to text (forced alignment using Whisper or Gentle)
+    \item Compute prosodic descriptors per line/stanza
+  \end{itemize}
+
+  \item \textbf{Dense Multimodal Alignment:}
+  \begin{itemize}
+    \item Embed poem (semantic + prosodic features) into high-dimensional space
+    \item Embed visual corpus (CLIP image encoder) into same space
+    \item Perform similarity search to retrieve top-K images per stanza
+    \item Rerank using combined text-audio similarity + coherence constraints
+  \end{itemize}
+
+  \item \textbf{Sequencing \& Dynamics:}
+  \begin{itemize}
+    \item Order retrieved images to create narrative flow across poem
+    \item Modulate blend transitions by prosodic energy (quiet passages → slow dissolves; peaks → hard cuts)
+    \item Modulate visual qualities by prosody (low pitch → darker imagery; high pitch → brighter; fast rhythm → kinetic motion)
+  \end{itemize}
+
+  \item \textbf{Rendering:}
+  \begin{itemize}
+    \item Generate video synchronized to poem audio
+    \item Apply optical flow or neural interpolation for smooth transitions
+    \item Optional: Use diffusion models (Stable Diffusion, ControlNet) for generative augmentation to "dreamify" images
+  \end{itemize}
+
+  \item \textbf{Output:} MP4 video files (one per poem) suitable for exhibition or study
+\end{enumerate}
+
+\subsection**{Technical Stack}
+
+\begin{itemize}
+  \item \textbf{Embeddings \& Retrieval:}
+  \begin{itemize}
+    \item CLIP (OpenAI) for text-image alignment
+    \item \texttt{sentence-transformers} for specialized semantic embeddings
+    \item \texttt{faiss} or \texttt{milvus} for fast similarity search at scale
+  \end{itemize}
+
+  \item \textbf{Audio Analysis:}
+  \begin{itemize}
+    \item \texttt{librosa} for prosodic feature extraction
+    \item OpenAI Whisper for speech-to-text alignment
+  \end{itemize}
+
+  \item \textbf{Image Manipulation:}
+  \begin{itemize}
+    \item \texttt{OpenCV} or \texttt{PyTorch} for image blending and interpolation
+    \item \texttt{diffusers} (Hugging Face) for optional generative augmentation
+  \end{itemize}
+
+  \item \textbf{Video Rendering:}
+  \begin{itemize}
+    \item \texttt{FFmpeg} or \texttt{moviepy} for video synthesis and audio synchronization
+  \end{itemize}
+
+  \item \textbf{Experiment \& Evaluation:}
+  \begin{itemize}
+    \item Python for all pipeline orchestration
+    \item Jupyter notebooks for exploratory work
+    \item Qualtrics or similar for user study surveys
+  \end{itemize}
+\end{itemize}
+
+\section*{Team Expertise}
+
+\subsection**{Relevant Skills}
+
+We've both had significant time working with:
+\begin{itemize}
+  \begin{itemize}
+    \item Multimodal machine learning (vision-language models, embeddings)
+    \item Audio signal processing and prosody analysis
+    \item Deep learning frameworks (PyTorch)
+    \item Computer vision and image retrieval
+    \item Visual design and aesthetics
+  \end{itemize}
+\end{itemize}
+
+We also happen to be taking Intro to Poetry this semester which will help us significantly in deconstructing a piece of poetry into the components that matter the most. 
+
+\subsection**{Potential Gaps \& Mitigation}
+\begin{itemize}
+  \item \textbf{Fine-tuning large models:} Will leverage pretrained, open-source models rather than training from scratch
+  \item \textbf{Generative modeling (diffusion):} Will use libraries like \texttt{diffusers} with minimal customization; treat as optional enhancement
+  \item \textbf{HCI study design:} Will consult course materials and best practices; design simple, clear study protocol
+\end{itemize}
+
+\section*{Hypotheses}
+
+\subsection**{Primary Hypothesis}
+\textbf{H1:} Embedding a poem in a corpus-derived, audio-guided visual dream creates a richer, more aesthetically resonant experience than:
+\begin{enumerate}[(a)]
+  \item The poem alone (text + audio)
+  \item Literal or naive algorithmic illustration
+\end{enumerate}
+
+\noindent We hypothesize that participants exposed to the multimodal visualization will report:
+\begin{itemize}
+  \item Higher emotional resonance and sense of "communion" with the poem
+  \item Deeper comprehension of the poem's thematic essence (without explicit meaning being imposed)
+  \item Enhanced sense of the poem's "world" or setting
+\end{itemize}
+
+\subsection**{Secondary Hypotheses}
+\begin{enumerate}
+  \item \textbf{H2 (Musicality-Guided Dynamics):} Visual transition dynamics guided by prosodic features (pitch, rhythm, energy) will be perceived as more coherent and aesthetically pleasing than random or uniform transitions.
+
+  \item \textbf{H3 (Semantic Resonance):} Dense multimodal alignment (incorporating semantic embeddings + prosodic weighting) will retrieve more thematically coherent image sequences than simple keyword matching or unimodal baselines.
+
+  \item \textbf{H4 (Generalization):} The alignment pipeline will generalize across poems from different genres, time periods, and cultural traditions, without requiring poem-specific tuning.
+\end{enumerate}
+
+\section*{Timeline (Week-by-Week)}
+
+\subsection**{Weeks 1–2: Dataset Curation \& Infrastructure Setup}
+\begin{itemize}
+  \item Curate visual corpus: download, filter, and organize 50K–100K images
+  \item Collect or record poetry readings; gather public domain recordings
+  \item Set up development environment: Python, PyTorch, CLIP, \texttt{librosa}
+  \item Perform preliminary semantic analysis on selected poems (manual annotation)
+  \item \textbf{Deliverable:} Curated image dataset + annotated poem metadata
+\end{itemize}
+
+\subsection**{Weeks 3–4: Semantic Extraction \& Embeddings}
+\begin{itemize}
+  \item Implement text embedding pipeline (CLIP text encoder)
+  \item Implement image embedding pipeline (CLIP image encoder)
+  \item Build image retrieval system (\texttt{faiss} indexing)
+  \item Perform initial retrieval experiments on 2–3 test poems
+  \item \textbf{Deliverable:} Working embedding + retrieval system with qualitative analysis of retrieved images
+\end{itemize}
+
+\subsection**{Weeks 5–6: Prosody Analysis \& Alignment}
+\begin{itemize}
+  \item Implement audio feature extraction (\texttt{librosa}: pitch, spectral, rhythm)
+  \item Implement speech-to-text alignment (Whisper or Gentle)
+  \item Design and implement dense multimodal alignment strategy (combine text + audio embeddings)
+  \item Test alignment on 2–3 poems; evaluate image sequence quality
+  \item \textbf{Deliverable:} Multimodal alignment system with visual examples of retrieved sequences
+\end{itemize}
+
+\subsection**{Weeks 7–8: Sequencing \& Dynamics}
+\begin{itemize}
+  \item Implement image sequencing algorithm (order retrieved images by narrative flow + coherence)
+  \item Implement prosody-guided dynamics (map pitch/rhythm/energy to visual transitions)
+  \item Test on 2–3 poems; refine visual continuity
+  \item Explore optional generative augmentation (diffusion models for dreamification)
+  \item \textbf{Deliverable:} Proof-of-concept video outputs for 2–3 poems
+\end{itemize}
+
+\subsection**{Weeks 9–10: Video Rendering \& Polish}
+\begin{itemize}
+  \item Implement full video pipeline (FFmpeg/moviepy): image blending + audio synchronization
+  \item Generate final videos for all 10–15 poems
+  \item Refine visual aesthetics: color grading, transition smoothness, pacing
+  \item Conduct initial qualitative review; iterate based on feedback
+  \item \textbf{Deliverable:} Polished video outputs (MP4 format) for exhibition
+\end{itemize}
+
+\subsection**{Weeks 11–12: User Study \& Evaluation}
+\begin{itemize}
+  \item Design user study protocol (3 conditions: poem alone, poem + visualization, poem + baseline)
+  \item Recruit participants (target: 20–30 classmates/volunteers)
+  \item Conduct study sessions; collect survey responses and qualitative feedback
+  \item Analyze results: quantitative metrics (comprehension, engagement, resonance) + qualitative themes
+  \item \textbf{Deliverable:} Study report with findings and implications
+\end{itemize}
+
+\subsection**{Weeks 13–14: Documentation \& Final Report}
+\begin{itemize}
+  \item Write final project report (methods, results, discussion, limitations)
+  \item Prepare presentation and demo materials
+  \item Document code and codebase for reproducibility
+  \item Create curated gallery of best visualizations
+  \item \textbf{Deliverable:} Final report, presentation, code repository
+\end{itemize}
+
+\subsection**{Contingency \& Flexibility}
+\begin{itemize}
+  \item Weeks slip frequently due to unforeseen technical challenges. We allocate buffer time by prioritizing core pipeline (weeks 3–8) and deferring optional enhancements (generative augmentation, advanced UI) if necessary.
+  \item If user study recruitment is slow, fall back to smaller cohort (10–15 participants) or focus on qualitative case studies.
+  \item If generative augmentation proves too complex, stick with image blending from corpus.
+\end{itemize}
+
+\section*{Expected Outcomes \& Deliverables}
+
+\begin{enumerate}
+  \item \textbf{Multimodal Visualization System:} Working Python codebase (open-source, documented) that takes a poem + audio and generates a synchronized multimodal video visualization
+
+  \item \textbf{Curated Gallery:} 10–20 finalized video outputs showcasing diverse poems and aesthetic outcomes
+
+  \item \textbf{Empirical Findings:} User study results (quantitative + qualitative) addressing whether corpus-driven visualization enhances poetry experience
+
+  \item \textbf{Technical Report:} Methods paper documenting the multimodal alignment strategy, prosody-guided dynamics, and lessons learned
+
+  \item \textbf{Public Artifact:} Exhibition-ready visualizations suitable for screening or online publication
+\end{enumerate}
+
+\section*{Broader Impact}
+
+\begin{itemize}
+  \item \textbf{Digital Humanities:} Demonstrates how AI can augment literary experience without replacing human interpretation
+  \item \textbf{Accessibility:} Multimodal visualization may enhance engagement for neurodivergent learners or non-native readers
+  \item \textbf{Ethical AI:} Shows thoughtful use of large corpora with proper attribution and license respect
+  \item \textbf{Creative Practice:} Positions AI as a collaborative tool for artists and scholars, not a replacement
+\end{itemize}
+
+\newpage
+
+\section*{Check in 1 Progress}
+
+\subsection*{Project Github Repo}
+
+\hyperlink{}{https://github.com/dave-sbs/poetry-multimodal-dream/}
+
+\subsection*{Dataset Description}
+
+The primary textual dataset for this project is the \textbf{Gutenberg Poetry Corpus}, sourced from the Hugging Face Hub (\texttt{biglam/gutenberg-poetry-corpus}) in Parquet format. The corpus contains poetry drawn from Project Gutenberg and spans a wide range of literary traditions, time periods, and styles.
+
+\subsubsection*{Corpus Statistics}
+\begin{itemize}
+  \item \textbf{Scale:} The corpus contains thousands of unique works (identified by Gutenberg ID), with each work represented as a sequence of lines stored in a structured dataframe.
+  \item \textbf{Length distribution:} Poem lengths range from a single line to over 50{,}000 lines. The distribution is heavily right-skewed: the median falls around 50--100 lines, while the mean is pulled upward by long epic collections.
+  \item \textbf{Length buckets:} We partition the corpus into nine length buckets for analysis:
+  \begin{center}
+  \begin{tabular}{ll}
+    \hline
+    \textbf{Range (lines)} & \textbf{Description} \\
+    \hline
+    1--50    & Very short poems / fragments \\
+    51--100  & Short poems \textit{(target range)} \\
+    101--250 & Medium poems \textit{(target range)} \\
+    251--500 & Long poems \textit{(target range)} \\
+    501--1000 & Extended poems \\
+    1001--2500 & Short collections \\
+    2501--5000 & Medium collections \\
+    5001--10000 & Long collections \\
+    10001--60000 & Very large collections \\
+    \hline
+  \end{tabular}
+  \end{center}
+  \item \textbf{Target range:} Poems in the 51--500 line range are prioritized as candidates for visualization, balancing sufficient content for multimodal alignment while remaining tractable for manual review.
+\end{itemize}
+
+\subsubsection*{Per-Poem Metadata}
+For each poem in the corpus we extract the following features to support downstream filtering and analysis:
+\begin{itemize}
+  \item \textbf{Line count} and \textbf{word count}
+  \item \textbf{Type-token ratio (TTR):} A measure of vocabulary richness (unique words / total words), computed on up to 200 lines
+  \item \textbf{Imagery density:} Count of nature and environmental imagery words (sky, ocean, forest, etc.) normalized by line count, computed on up to 300 lines
+  \item \textbf{Estimated era:} Heuristic classification (\textit{archaic}, \textit{early\_modern}, \textit{modern}) based on the frequency of archaic markers (e.g., ``thee,'' ``thou,'' ``hath'')
+  \item \textbf{Average line length} (characters)
+  \item \textbf{First and last five lines} for qualitative preview
+\end{itemize}
+
+These features are compiled into a \texttt{corpus\_catalog.csv} and used to generate a ranked shortlist of visualization candidates, scored by a weighted combination of imagery density, vocabulary richness, and whether the poem falls in the 100--300 line sweet spot.
+
+\subsection*{Ethical Data Statement}
+
+\subsubsection*{Textual Corpus}
+All poetry in the Gutenberg corpus is drawn from Project Gutenberg, which publishes works whose copyright has expired and entered the public domain in the United States. No living authors are included; the corpus consists entirely of historical literary works. There is no personally identifiable information, and the data carries no associated demographic, financial, or sensitive personal attributes.
+
+\subsubsection*{Visual Corpus}
+The planned visual corpus (50{,}000--100{,}000 environmental and architectural images) will be sourced exclusively from openly licensed collections:
+\begin{itemize}
+  \item Wikimedia Commons (public domain and CC-BY)
+  \item Unsplash and Pexels (free-to-use licenses)
+  \item Google Open Images (CC-licensed subset)
+\end{itemize}
+All images will be curated to exclude faces, commercially identifiable content, and any imagery that could constitute a privacy violation. Proper attribution will be maintained throughout.
+
+\subsubsection*{Human Subjects}
+No human subjects data is collected at this stage. A planned user study (Weeks 11--12) will involve voluntary participant surveys to evaluate the aesthetic experience of the generated visualizations. That study will follow applicable ethical guidelines and course requirements, including informed consent and anonymization of responses.
+
+\subsubsection*{Cultural Representation}
+We acknowledge that the Gutenberg corpus skews toward Western, English-language literary traditions due to Project Gutenberg's historical digitization priorities. We will deliberately seek poems from diverse cultural backgrounds (translated works, Classical traditions beyond English Romanticism) and will avoid presenting the system's outputs as culturally neutral or universal.
+
+\subsection*{Problem Formulation}
+
+The core research question driving this project is:
+
+\begin{quote}
+\textit{How can a computational system learn the relationships between a poem's textual semantics, sonic qualities, and visual/environmental essence in order to generate emergent multimodal visualizations that make visceral the interplay of language, sound, and space? (*although the audio part of this project is currently sidelined)}
+\end{quote}
+
+\noindent Formally, given:
+\begin{itemize}
+  \item A poem $P$ represented as a sequence of lines $\{l_1, l_2, \ldots, l_n\}$
+  \item An audio recording $A$ of a recitation of $P$
+  \item A large visual corpus $\mathcal{V}$ of environmental and architectural images
+\end{itemize}
+We seek a mapping $f(P, A) \rightarrow \mathcal{S}$ where $\mathcal{S}$ is a temporally coherent sequence of images from $\mathcal{V}$, synchronized to the audio $A$, such that the resulting video $V = \text{render}(\mathcal{S}, A)$ is perceived by human observers as aesthetically resonant and thematically coherent with $P$.
+
+\noindent This formulation requires solving four sub-problems:
+\begin{enumerate}
+  \item \textbf{Representation:} Encode text, audio, and images into a shared embedding space.
+  \item \textbf{Alignment:} Match poem stanzas and audio segments to retrieved image sequences.
+  \item \textbf{Translation:} Map prosodic features (pitch, rhythm, energy) to visual dynamics (transition timing, blend speed, image selection).
+  \item \textbf{Fusion:} Combine text and audio signals to jointly rank and sequence retrieved images.
+\end{enumerate}
+
+\noindent We evaluate this formulation against four hypotheses (H1--H4): that corpus-driven multimodal visualization produces richer aesthetic experience than text or audio alone (H1); that prosody-guided dynamics are perceived as more coherent than uniform transitions (H2); that dense multimodal alignment outperforms keyword matching (H3); and that the pipeline generalizes across poetic genres and traditions without poem-specific tuning (H4).
+
+\subsection*{Preprocessing Pipeline Overview}
+
+The preprocessing pipeline is implemented in \texttt{code/explore\_corpus.py} and \texttt{code/exploration.py}. It consists of six sequential steps:
+
+\begin{enumerate}
+  \item \textbf{Data loading.} The Gutenberg Poetry Corpus is loaded from Hugging Face (\texttt{biglam/gutenberg-poetry-corpus}) as a Parquet file into a Pandas dataframe. A poem lookup table is constructed by grouping all rows by \texttt{gutenberg\_id}, mapping each ID to its list of lines for fast access.
+
+  \item \textbf{Stratified sampling.} To enable qualitative exploration without loading the entire corpus into memory, poems are sampled across all nine length buckets (5 poems per bucket by default, with a fixed random seed for reproducibility). Each sampled poem is written to a text file and recorded in a JSON manifest.
+
+  \item \textbf{Metadata catalog construction.} For every poem in the corpus, per-poem metadata is extracted (line count, word count, TTR, imagery density, estimated era, average line length, and first/last lines) and written to \texttt{exploration\_output/corpus\_catalog.csv}. This catalog serves as the index for all downstream filtering.
+
+  \item \textbf{LLM prompt generation.} Structured prompts for literary analysis are generated for each sampled poem. Each prompt instructs an LLM to return a JSON object containing the poem's inferred title, author, genre, themes, environmental imagery richness (1--5), musicality (1--5), and a recommendation on suitability for visualization. Prompts are saved both as a consolidated JSON file and as individual \texttt{.txt} files for manual inspection.
+
+  \item \textbf{Visualization.} Three diagnostic plots are generated and saved to \texttt{exploration\_output/plots/}:
+  \begin{itemize}
+    \item \texttt{length\_distribution.png} — linear and log-scale histograms of poem lengths with mean and median marked
+    \item \texttt{bucket\_breakdown.png} — bar chart of poem counts per length bucket, highlighting the target range
+    \item \texttt{catalog\_analysis.png} — three-panel figure showing era distribution (pie), vocabulary richness (TTR histogram), and imagery density vs.\ length (scatter)
+  \end{itemize}
+
+  \item \textbf{Shortlist generation.} The catalog is filtered to poems in the 51--500 line range with imagery density $\geq 0.03$. Remaining candidates are scored by:
+  \[
+    \text{score} = 50 \times \text{imagery\_density} + 30 \times \text{TTR} + 20 \times \mathbf{1}[\text{lines} \in [100, 300]]
+  \]
+  and ranked in descending order. The top candidates are saved to \texttt{exploration\_output/shortlist.csv} for poem selection.
+\end{enumerate}
+
+\end{document}

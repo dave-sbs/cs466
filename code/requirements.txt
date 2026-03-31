@@ -1,0 +1,11 @@
+pandas
+pyarrow
+fastparquet
+huggingface-hub
+matplotlib
+numpy
+datasets
+Pillow
+torch
+transformers
+faiss-cpu

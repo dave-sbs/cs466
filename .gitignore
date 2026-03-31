@@ -1,0 +1,51 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Environments
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# IDE
+.idea/
+.vscode/
+.cursor/
+
+# Large data artifacts (not tracked in git)
+code/data/images/
+code/data/openimages_csv/
+code/data/embeddings.npy
+code/data/faiss_index.bin
+
+# Generated outputs (reproducible)
+code/output/retrieval_results/
+code/output/galleries/
+code/exploration_output/samples_stratified/
+code/exploration_output/prompts_individual/
+code/exploration_output/plots/
+
+# Sampled poem text files
+code/samples/
+
+# Temporary files
+*.log
+*.tmp
+
+# Report files
+video/
+research/
