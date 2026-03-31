@@ -28,7 +28,7 @@
 \maketitle
 
 \begin{center}
-  \small\textbf{GitHub:} \url{https://github.com/dave-sbs/poetry-multimodal-dream/}
+  \small\textbf{GitHub:} \url{https://github.com/dave-sbs/cs466}
 \end{center}
 
 \section*{Project Name}
@@ -38,7 +38,7 @@
 
 Poetry is inherently visceral, yet computational treatments often isolate language from its sonic and visual dimensions. When a poem is spoken aloud, musicality, arising from prosody, meter, rhyme, and phonetic texture, transforms meaning. Similarly, the \textit{setting} of a poem (its implied world) shapes aesthetic experience but remains abstract, existing only in the reader's imagination.
 
-\subsection**{Core Research Problem}
+\subsection*{Core Research Problem}
 \textbf{Can we create a computational model that learns the relationships between:}
 \begin{enumerate}
   \item \textbf{Textual semantics and form} (language, rhyme scheme, meter, thematic content)
@@ -48,7 +48,7 @@ Poetry is inherently visceral, yet computational treatments often isolate langua
 
 \noindent And use these learned relationships to generate emergent, multimodal visualizations that make visceral the interplay of language, sound, and space?
 
-\subsection**{Artistic Vision}
+\subsection*{Artistic Vision}
 Inspired by Refik Anadol's work on data-driven visualization artworks - which use millions of images to create AI-generated "dreams", we propose to:
 \begin{enumerate}
   \item Align poetry (as text and audio) to a large corpus of environmental and architectural images
@@ -476,6 +476,117 @@ The preprocessing pipeline is implemented in \texttt{code/explore\_corpus.py} an
     \text{score} = 50 \times \text{imagery\_density} + 30 \times \text{TTR} + 20 \times \mathbf{1}[\text{lines} \in [100, 300]]
   \]
   and ranked in descending order. The top candidates are saved to \texttt{exploration\_output/shortlist.csv} for poem selection.
+\end{enumerate}
+
+\newpage
+
+\section*{Check in 2 Progress}
+
+\subsection*{Summary}
+
+Since Check in 1, the project has advanced through the visual corpus acquisition, CLIP embedding, FAISS index construction, per-stanza image retrieval, and a qualitative evaluation framework. The core text-to-image retrieval pipeline is now fully operational. Audio-prosody analysis remains sidelined for now; the current focus is on validating the quality of semantic text-image alignment before reintegrating the sonic modality.
+
+\subsection*{Visual Corpus Acquisition}
+
+\subsubsection*{Dataset Selection}
+
+The visual corpus is sourced from \textbf{\texttt{mertcobanov/nature-dataset}} on the Hugging Face Hub --- a curated collection of approximately 50{,}000 nature and landscape photographs with free-form text captions. This dataset was chosen because:
+\begin{itemize}
+  \item It provides high-quality environmental and atmospheric imagery well-suited to poetry's evocative character.
+  \item It is openly licensed and does not contain faces, commercial products, or privacy-sensitive content.
+  \item The caption field supports future multimodal experiments (caption-guided retrieval, captioning evaluation).
+\end{itemize}
+
+Images are downloaded locally to \texttt{data/images/} as full-colour JPEGs via \texttt{download\_images.py}. A \texttt{manifest.csv} index records filenames, captions, and source indices, enabling resumable incremental downloads. The current prototype operates on approximately 500 images; the full 50K corpus download is in place and ready to scale.
+
+In parallel, Google Open Images bounding-box annotation files (\texttt{data/openimages\_csv/}) were explored as an alternative large-scale visual source. These CSVs are retained for potential future expansion of the corpus.
+
+\subsection*{CLIP Embedding Pipeline}
+
+The embedding and retrieval system is implemented in \texttt{clip\_pipeline.py} and consists of three sequential, independently runnable steps.
+
+\subsubsection*{Step 1 — Image Encoding}
+
+All images in \texttt{data/images/} are encoded with \textbf{OpenAI CLIP ViT-B/32} (\texttt{openai/clip-vit-base-patch32}) loaded via the Hugging Face \texttt{transformers} library. For each batch of images:
+\begin{enumerate}
+  \item Images are decoded and converted to RGB using \texttt{Pillow}.
+  \item The \texttt{CLIPProcessor} resizes, normalises, and pads the batch.
+  \item The CLIP vision encoder produces a 512-dimensional pooled representation per image.
+  \item Embeddings are \textbf{L2-normalised} so that inner-product similarity is equivalent to cosine similarity.
+\end{enumerate}
+Embeddings are saved as \texttt{data/embeddings.npy} (shape: $N \times 512$), and the corresponding filename index is saved as \texttt{data/image\_ids.json}. The pipeline supports batched GPU acceleration via CUDA or Apple MPS.
+
+\subsubsection*{Step 2 — FAISS Index Construction}
+
+A \textbf{FAISS \texttt{IndexFlatIP}} (flat inner-product index) is built from the L2-normalised embeddings. Because the embeddings are unit-normalised, inner product is equivalent to cosine similarity, giving exact nearest-neighbour retrieval without approximation. The index is serialised to \texttt{data/faiss\_index.bin} and can be scaled to millions of vectors with FAISS's approximate index variants if needed.
+
+\subsubsection*{Step 3 — Per-Stanza Image Retrieval}
+
+Given a poem identified by its Gutenberg ID (or free-form text), the retrieval step:
+\begin{enumerate}
+  \item \textbf{Stanza splitting:} The poem is divided into stanzas by detecting blank lines. If no blank lines are found, it falls back to fixed-size line chunks (default: 8 lines per chunk). Each stanza is joined into a single string query.
+  \item \textbf{Text encoding:} Each stanza string is encoded with the CLIP text encoder (max 77 tokens, truncated). The resulting 512-dimensional text embedding is L2-normalised.
+  \item \textbf{Similarity search:} The FAISS index is queried for the top-$K$ most similar image embeddings (default $K=5$) using cosine similarity.
+  \item \textbf{Result persistence:} Retrieved images are copied into \texttt{output/retrieval\_results/<poem\_id>/} with rank-annotated filenames (e.g., \texttt{chunk000\_rank1\_00195.jpg}), and a \texttt{retrieval\_manifest.json} records query texts, image IDs, and similarity scores for each stanza.
+\end{enumerate}
+Retrieval has been successfully run on five Gutenberg poems (IDs: 163, 602, 610, 9825, 10469) and an arbitrary free-text query, demonstrating that the system generalises beyond pre-selected works.
+
+\subsection*{Qualitative Evaluation Framework}
+
+To support human inspection of retrieval quality, \texttt{evaluate\_retrieval.py} generates \textbf{self-contained HTML galleries}. Each gallery renders:
+\begin{itemize}
+  \item The stanza text on the left, formatted with poetic line breaks.
+  \item The top-$K$ retrieved images in a responsive grid, each annotated with its cosine similarity score.
+  \item Colour-coded score badges: green ($\geq 0.25$), yellow ($\geq 0.18$), red ($< 0.18$) to highlight retrieval confidence at a glance.
+\end{itemize}
+Images are base64-encoded inline, producing portable single-file galleries with no external dependencies. An \texttt{index.html} links all generated galleries for easy navigation. Four galleries have been produced: poems 10469, 163, 602, and 610.
+
+\subsubsection*{Preliminary Observations}
+
+Initial qualitative review of the galleries reveals:
+\begin{itemize}
+  \item \textbf{Cosine similarity range:} Retrieved scores for the current 500-image prototype cluster around 0.23--0.26. Scores are expected to become more discriminative as corpus size increases and greater visual diversity is introduced.
+  \item \textbf{Semantic coherence:} For poems with strong environmental imagery (nature, landscapes, seasons), retrieved images are noticeably more thematically aligned than for narrative or character-focused stanzas. This confirms the importance of the corpus shortlisting step from Check in 1.
+  \item \textbf{Stanza splitting quality:} Stanza-level splitting produces more semantically coherent query strings than fixed-size chunking for well-formatted poems, consistent with the expectation that stanza boundaries encode natural thematic units.
+\end{itemize}
+
+\subsection*{Technical Stack Update}
+
+The implemented pipeline uses the following libraries (see \texttt{requirements.txt}):
+\begin{itemize}
+  \item \textbf{CLIP embeddings:} \texttt{transformers} (Hugging Face), \texttt{torch}
+  \item \textbf{Similarity search:} \texttt{faiss-cpu}
+  \item \textbf{Image I/O:} \texttt{Pillow}
+  \item \textbf{Dataset access:} \texttt{datasets}, \texttt{huggingface-hub}
+  \item \textbf{Data handling:} \texttt{pandas}, \texttt{numpy}, \texttt{pyarrow}
+\end{itemize}
+
+\subsection*{Current Status and Next Steps}
+
+\begin{center}
+\begin{tabular}{lll}
+  \hline
+  \textbf{Component} & \textbf{Status} & \textbf{Notes} \\
+  \hline
+  Corpus exploration \& shortlisting & Complete & \texttt{explore\_corpus.py} \\
+  Visual corpus download             & Complete (prototype) & 500 images; 50K ready to scale \\
+  CLIP image embedding               & Complete & \texttt{clip\_pipeline.py --step embed-images} \\
+  FAISS index                        & Complete & \texttt{clip\_pipeline.py --step build-index} \\
+  Per-stanza retrieval               & Complete & Tested on 5 poems + free text \\
+  HTML gallery evaluation            & Complete & 4 galleries generated \\
+  Audio / prosody analysis           & Sidelined & Deprioritised; text-image focus \\
+  Video rendering                    & Pending  & Awaiting retrieval quality validation \\
+  User study                         & Pending  & Design in progress \\
+  \hline
+\end{tabular}
+\end{center}
+
+\noindent The immediate next steps are:
+\begin{enumerate}
+  \item \textbf{Scale the image corpus} to the full 50K nature dataset and rebuild embeddings and the FAISS index to improve retrieval diversity and discriminability.
+  \item \textbf{Quantitative retrieval evaluation:} Design a rubric for scoring semantic relevance of retrieved images per stanza; conduct systematic annotation of a subset of retrieval results.
+  \item \textbf{Video rendering prototype:} Implement the first end-to-end video output for a single poem using \texttt{moviepy} or \texttt{FFmpeg}, sequencing retrieved images stanza-by-stanza with crossfade transitions.
+  \item \textbf{Prosody re-integration (deferred):} Once video rendering is stable, explore using Whisper-based speech alignment to synchronise image transitions with audio playback timing.
 \end{enumerate}
 
 \end{document}
