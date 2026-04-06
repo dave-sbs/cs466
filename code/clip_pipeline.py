@@ -15,6 +15,7 @@ Retrieve options:
 """
 
 import os
+os.environ.setdefault("KMP_DUPLICATE_LIB_OK", "TRUE")
 import json
 import argparse
 import shutil
@@ -27,6 +28,8 @@ import torch
 from transformers import CLIPProcessor, CLIPModel
 
 import faiss
+
+from interpretability import compute_line_attributions
 
 
 # ─── Configuration ────────────────────────────────────────────────────────────
@@ -220,6 +223,7 @@ def retrieve(
     top_k: int = 5,
     chunk_size: int = 8,
     use_stanzas: bool = True,
+    compute_attributions: bool = False,
 ):
     """Retrieve top-K images per chunk/stanza for a poem or free text."""
     print("=== Step 3: Retrieving Images ===\n")
@@ -229,9 +233,17 @@ def retrieve(
             print(f"Missing {p}. Run --step build-index first.")
             return
 
+    if compute_attributions and not EMBEDDINGS_PATH.exists():
+        print(f"Missing {EMBEDDINGS_PATH}. Run --step embed-images first (needed for attributions).")
+        return
+
     index = faiss.read_index(str(FAISS_INDEX_PATH))
     with open(IMAGE_IDS_PATH) as f:
         image_ids = json.load(f)
+
+    all_image_embeddings = None
+    if compute_attributions:
+        all_image_embeddings = np.load(str(EMBEDDINGS_PATH)).astype("float32")
 
     device = get_device()
     model, processor = load_model(device)
@@ -270,6 +282,15 @@ def retrieve(
         query_vec = text_features.cpu().numpy().astype("float32")
         scores, indices = index.search(query_vec, top_k)
 
+        # Compute per-line attribution scores if requested
+        line_attributions = None
+        line_texts = None
+        if compute_attributions:
+            retrieved_img_embs = all_image_embeddings[indices[0]]  # shape [K, 512]
+            line_attributions, line_texts = compute_line_attributions(
+                model, processor, query, retrieved_img_embs, device
+            )
+
         chunk_results = []
         for rank, (idx, score) in enumerate(zip(indices[0], scores[0])):
             img_rel = image_ids[idx]
@@ -281,18 +302,24 @@ def retrieve(
             if img_src.exists():
                 shutil.copy2(str(img_src), str(dest))
 
-            chunk_results.append({
+            item = {
                 "rank": rank + 1,
                 "score": float(score),
                 "image_id": img_rel,
                 "output_file": dest_name,
-            })
+            }
+            if line_attributions is not None:
+                item["line_attributions"] = line_attributions[rank]
+            chunk_results.append(item)
 
-        results.append({
+        chunk_result = {
             "chunk_index": i,
             "query_text": query,
             "top_k": chunk_results,
-        })
+        }
+        if line_texts is not None:
+            chunk_result["line_texts"] = line_texts
+        results.append(chunk_result)
 
         print(f"  Chunk {i+1}/{len(queries)}: \"{query[:60]}{'...' if len(query) > 60 else ''}\"")
         for r in chunk_results:
@@ -361,6 +388,11 @@ def main():
         action="store_true",
         help="Use fixed-size chunks instead of stanza detection",
     )
+    parser.add_argument(
+        "--attributions",
+        action="store_true",
+        help="Compute per-line attribution scores for interpretability",
+    )
     args = parser.parse_args()
 
     if args.step in ("embed-images", "all"):
@@ -379,6 +411,7 @@ def main():
                 top_k=args.top_k,
                 chunk_size=args.chunk_size,
                 use_stanzas=not args.no_stanzas,
+                compute_attributions=args.attributions,
             )
 
     print("Done.")
