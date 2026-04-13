@@ -11,6 +11,7 @@ code/
 ├── constants.py              # Pre-computed poem length dictionary
 ├── exploration.py            # Ad-hoc corpus stats and manual sampling
 ├── explore_corpus.py         # Systematic corpus exploration pipeline
+├── llm_analysis.py           # LLM-based poem tagging & preprocessing (OpenRouter)
 ├── download_images.py        # Download nature images from HuggingFace
 ├── clip_pipeline.py          # CLIP embedding + FAISS retrieval pipeline
 ├── evaluate_retrieval.py     # HTML gallery generator for qualitative evaluation
@@ -23,6 +24,8 @@ code/
 ├── exploration_output/
 │   ├── corpus_catalog.csv    # Per-poem metadata for all corpus poems
 │   ├── shortlist.csv         # Ranked visualization candidates
+│   ├── llm_analysis.jsonl    # Raw LLM analysis results (not tracked in git)
+│   ├── llm_analysis_summary.csv # Flattened LLM results for pandas
 │   ├── llm_prompts.json      # LLM analysis prompts (consolidated)
 │   ├── plots/                # Diagnostic visualizations (PNG)
 │   ├── prompts_individual/   # Per-poem LLM analysis prompts (TXT)
@@ -70,6 +73,34 @@ python explore_corpus.py --step shortlist  # Filter and rank visualization candi
 ```
 
 **Outputs:** `exploration_output/shortlist.csv`, `exploration_output/corpus_catalog.csv`, `exploration_output/samples_stratified/`
+
+---
+
+### Step 1.5 — LLM Poem Analysis
+
+Analyze poems with Gemini Flash via OpenRouter for thematic tagging, non-poem detection, visual scene extraction, and mood arc mapping:
+
+```bash
+export OPENROUTER_API_KEY=<your-key>   # or add to .env file
+
+python llm_analysis.py                              # Run all steps
+python llm_analysis.py --step analyze --limit 5     # Test with 5 poems
+python llm_analysis.py --step analyze --source catalog  # Analyze full catalog
+python llm_analysis.py --step summarize             # Flatten JSONL → CSV
+python llm_analysis.py --step report                # Print theme/category statistics
+```
+
+The script is resumable — re-running skips already-analyzed poems. Responses are validated with Pydantic and stored as JSONL.
+
+**What it produces per poem:**
+- Theme tags and primary nature setting (for image dataset gap analysis)
+- Non-poem content flags (disclaimers, TOCs, author bios)
+- CLIP-friendly visual scene descriptions per stanza (bridges poetic → photo-caption language)
+- Mood arc (opening → middle → closing) for video sequencing
+- Visualization suitability score (1–5)
+- Title/author guesses (metadata the corpus lacks)
+
+**Outputs:** `exploration_output/llm_analysis.jsonl` (raw), `exploration_output/llm_analysis_summary.csv` (flattened)
 
 ---
 
