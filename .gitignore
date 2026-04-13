@@ -14,6 +14,9 @@ build/
 venv/
 env/
 
+# Environment variables
+.env
+
 # Jupyter
 .ipynb_checkpoints/
 
@@ -38,6 +41,7 @@ code/output/galleries/
 code/exploration_output/samples_stratified/
 code/exploration_output/prompts_individual/
 code/exploration_output/plots/
+code/exploration_output/llm_analysis.jsonl
 
 # Sampled poem text files
 code/samples/

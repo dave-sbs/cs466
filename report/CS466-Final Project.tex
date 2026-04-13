@@ -139,9 +139,9 @@ This project engages all five multimodal challenges defined in contemporary lite
 
   \item \textbf{Semantic Extraction:}
   \begin{itemize}
-    \item NLP-based theme detection (e.g., "isolation," "nature," "transcendence"). Use concrete and abstract nouns
-    \item Manual annotation of key imagery and emotional arc per stanza
-    \item Generate semantic embeddings (using CLIP text encoder or fine-tuned poetry-specific encoder)
+    \item LLM-based theme detection and visual scene description via Gemini Flash (automated, structured JSON output validated with Pydantic)
+    \item Non-poem content filtering and quality assessment (OCR artifacts, disclaimers, tables of contents)
+    \item Generate semantic embeddings (using CLIP text encoder), with optional LLM-generated scene descriptions as alternative queries
   \end{itemize}
 
   \item \textbf{Prosody Analysis:}
@@ -476,6 +476,20 @@ The preprocessing pipeline is implemented in \texttt{code/explore\_corpus.py} an
     \text{score} = 50 \times \text{imagery\_density} + 30 \times \text{TTR} + 20 \times \mathbf{1}[\text{lines} \in [100, 300]]
   \]
   and ranked in descending order. The top candidates are saved to \texttt{exploration\_output/shortlist.csv} for poem selection.
+
+  \item \textbf{LLM-based poem analysis.} Each shortlisted poem is sent to a lightweight LLM (Gemini Flash via OpenRouter) for structured analysis. The model returns a validated JSON object (enforced with Pydantic) containing:
+  \begin{itemize}
+    \item \textbf{Theme tags} and \textbf{primary nature setting} (e.g., ocean, forest, mountain) — used to audit whether the image corpus covers the nature categories poems actually require.
+    \item \textbf{Non-poem content detection:} classification of content type (poem, table of contents, preface, biography, disclaimer, etc.) and flagging of entries that are not actual poems. The Gutenberg corpus contains OCR artifacts, author biographies, and other non-poem text that the heuristic filters cannot reliably detect.
+    \item \textbf{CLIP-friendly visual scene descriptions} per stanza — concrete, photographic descriptions (e.g., ``a dark pine forest at twilight with mist rising between ancient trunks'') that bridge the gap between poetic language and CLIP's photo-caption training distribution. These can be used as alternative retrieval queries in place of raw stanza text.
+    \item \textbf{Mood arc} (opening $\rightarrow$ middle $\rightarrow$ closing) — maps emotional progression for video sequencing, so that a poem moving from melancholy to hope is reflected in the image transitions.
+    \item \textbf{Visualization suitability score} (1--5) — an LLM-assessed rating of how cinematic and visually evocative the poem is, complementing the keyword-based imagery density heuristic.
+    \item \textbf{Title and author identification} — the Gutenberg corpus lacks this metadata; LLM guesses enable grouping and labeling.
+  \end{itemize}
+
+  Results are stored in \texttt{exploration\_output/llm\_analysis.jsonl} (one JSON object per line) with resumability: re-running skips already-analyzed poems. A flattened CSV summary (\texttt{llm\_analysis\_summary.csv}) is generated for pandas integration, and a report step prints aggregate statistics (theme distribution, nature category coverage gaps, non-poem content counts).
+
+  This step is implemented in \texttt{code/llm\_analysis.py} and uses direct HTTP calls to the OpenRouter API with exponential-backoff retry logic for rate limits and transient errors.
 \end{enumerate}
 
 \newpage
