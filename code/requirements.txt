@@ -9,3 +9,6 @@ Pillow
 torch
 transformers
 faiss-cpu
+requests
+pydantic
+python-dotenv
