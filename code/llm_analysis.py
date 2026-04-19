@@ -9,13 +9,17 @@ Usage:
     python llm_analysis.py --step summarize   # Generate CSV summary from JSONL results
     python llm_analysis.py --step report      # Print analysis statistics
     python llm_analysis.py                    # Run all steps
+    python llm_analysis.py --gutenberg-id 9825 --step analyze   # Analyze one poem (local text or HF corpus)
+    python llm_analysis.py --gutenberg-id 9825 --step summarize  # Print stored analysis for that ID
 
 Options:
     --source shortlist|catalog   Which poem set to process (default: shortlist)
     --limit N                    Process at most N poems (for testing)
     --delay SECONDS              Delay between API calls (default: 0.5)
-    --model MODEL                Override model (default: google/gemini-2.5-flash-preview)
+    --model MODEL                Override model (see DEFAULT_MODEL in code)
     --max-lines N                Max poem lines to send to LLM (default: 200)
+    --gutenberg-id ID            Analyze or print summary for a single poem
+    --force                      With --gutenberg-id and analyze: re-call API even if JSONL has this ID
 """
 
 import os
@@ -25,6 +29,7 @@ import time
 import argparse
 from datetime import datetime, timezone
 from collections import Counter
+from pathlib import Path
 
 import requests
 import pandas as pd
@@ -47,6 +52,11 @@ JSONL_PATH = os.path.join(OUTPUT_DIR, "llm_analysis.jsonl")
 SUMMARY_CSV_PATH = os.path.join(OUTPUT_DIR, "llm_analysis_summary.csv")
 SHORTLIST_PATH = os.path.join(OUTPUT_DIR, "shortlist.csv")
 CATALOG_PATH = os.path.join(OUTPUT_DIR, "corpus_catalog.csv")
+
+# Same layout as clip_pipeline.load_poem_lines — prefer aligned pg_raw text when present.
+PG_RAW_POEM_DIR = Path("exploration_output/pg_raw")
+SAMPLES_STRATIFIED_DIR = Path("exploration_output/samples_stratified")
+SAMPLES_DIR = Path("samples")
 
 
 # ─── Pydantic Models ─────────────────────────────────────────────────────────
@@ -106,6 +116,106 @@ def load_df():
 def build_poem_lookup(df: pd.DataFrame) -> dict[int, list[str]]:
     """Pre-group the dataframe by gutenberg_id for fast access."""
     return {gid: group["line"].tolist() for gid, group in df.groupby("gutenberg_id")}
+
+
+def load_poem_lines_single(gutenberg_id: int) -> tuple[list[str], str]:
+    """
+    Load poem lines for one ID. Prefer aligned pg_raw, then stratified samples, then samples/.
+
+    Returns (lines, source_label).
+    """
+    pg_path = PG_RAW_POEM_DIR / f"poem_{gutenberg_id}.txt"
+    if pg_path.exists():
+        with open(pg_path, encoding="utf-8") as f:
+            return f.read().splitlines(), "pg_raw"
+
+    for folder, label in (
+        (SAMPLES_STRATIFIED_DIR, "samples_stratified"),
+        (SAMPLES_DIR, "samples"),
+    ):
+        p = folder / f"poem_{gutenberg_id}.txt"
+        if p.exists():
+            with open(p, encoding="utf-8") as f:
+                lines = [line for line in f.read().splitlines() if line.strip()]
+            return lines, label
+
+    print("  No local poem file; loading corpus parquet (one ID)...")
+    df = load_df()
+    sub = df[df["gutenberg_id"] == gutenberg_id]
+    if sub.empty:
+        raise SystemExit(
+            f"gutenberg_id {gutenberg_id} not found in HuggingFace corpus parquet "
+            "and no local poem_{id}.txt under exploration_output/pg_raw or samples."
+        )
+    lines = sub["line"].astype(str).tolist()
+    return lines, "hf_parquet"
+
+
+def load_last_jsonl_record_for_id(jsonl_path: str, gutenberg_id: int) -> dict | None:
+    """Return the last JSON object in the JSONL file for this gutenberg_id, or None."""
+    if not os.path.exists(jsonl_path):
+        return None
+    last: dict | None = None
+    with open(jsonl_path, encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                record = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if record.get("gutenberg_id") == gutenberg_id:
+                last = record
+    return last
+
+
+def print_poem_analysis_summary(record: dict) -> None:
+    """Print a readable summary of one analysis record (stdout)."""
+    gid = record.get("gutenberg_id", "?")
+    if record.get("llm_parse_error"):
+        print(f"\n  Poem {gid}: parse error — {record.get('error', 'unknown')}\n")
+        if record.get("raw_response"):
+            print(f"  Raw (truncated): {str(record['raw_response'])[:500]}...\n")
+        return
+
+    print(f"\n  === LLM summary: Gutenberg ID {gid} ===\n")
+    print(f"  Title:    {record.get('title', '')}")
+    print(f"  Author:   {record.get('author', '')}")
+    print(f"  Type:     {record.get('content_type', '')}  (is_poem={record.get('is_poem')})")
+    print(f"  Genre:    {record.get('genre', '')}")
+    print(f"  Theme:    {record.get('primary_theme', '')}")
+    themes = record.get("themes") or []
+    if themes:
+        print(f"  Themes:   {', '.join(str(t) for t in themes)}")
+    print(f"  Nature:   {record.get('primary_nature_setting', '')}")
+    cats = record.get("nature_categories") or []
+    if cats:
+        print(f"            ({', '.join(str(c) for c in cats)})")
+    print(f"  Mood:     {record.get('overall_mood', '')}")
+    print(f"  Language: {record.get('language', '')}")
+    print(f"  Viz score:{record.get('visualization_suitability', '')}/5 — {record.get('visualization_rationale', '')}")
+    rationale = record.get("content_type_rationale") or ""
+    if rationale:
+        print(f"  Rationale:{rationale}")
+    scenes = record.get("visual_scenes") or []
+    if scenes:
+        print("\n  Visual scenes (by stanza):")
+        for s in scenes[:12]:
+            idx = s.get("stanza_index", "?")
+            desc = (s.get("scene_description") or "")[:200]
+            cols = s.get("dominant_colors") or []
+            print(f"    [{idx}] {desc}{'...' if len(str(s.get('scene_description', ''))) > 200 else ''}")
+            if cols:
+                print(f"         colors: {', '.join(str(c) for c in cols)}")
+        if len(scenes) > 12:
+            print(f"    ... ({len(scenes) - 12} more stanzas)")
+    notable = record.get("notable_lines") or []
+    if notable:
+        print("\n  Notable lines:")
+        for ln in notable[:8]:
+            print(f"    • {ln}")
+    print(f"\n  Model: {record.get('model', '')}  |  lines sent context: {record.get('line_count', '')}\n")
 
 
 # ─── HTTP Client ──────────────────────────────────────────────────────────────
@@ -431,6 +541,70 @@ def run_analysis(
     print()
 
 
+def run_single_poem_analysis(
+    gutenberg_id: int,
+    model: str,
+    max_lines: int,
+    delay: float,
+    force: bool,
+) -> None:
+    """Run LLM analysis for one gutenberg_id; append to JSONL; print a readable summary."""
+    print(f"=== Single-poem LLM analysis (gutenberg_id={gutenberg_id}) ===\n")
+
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    if not force:
+        cached = load_last_jsonl_record_for_id(JSONL_PATH, gutenberg_id)
+        if cached is not None:
+            print("  Found existing analysis in JSONL (use --force to re-call the API).\n")
+            print_poem_analysis_summary(cached)
+            return
+
+    api_key = get_api_key()
+    lines, source = load_poem_lines_single(gutenberg_id)
+    line_count = len(lines)
+    print(f"  Loaded {line_count} lines (source={source}).\n")
+
+    result = analyze_poem(lines, gutenberg_id, line_count, model, api_key, max_lines)
+    append_result(JSONL_PATH, result)
+
+    if result.get("llm_parse_error"):
+        print(f"  ERROR: {result.get('error', 'unknown')}\n")
+    else:
+        print("  Appended to JSONL.\n")
+        print_poem_analysis_summary(result)
+
+    if delay and delay > 0:
+        time.sleep(delay)
+
+
+def run_summarize_single_poem(gutenberg_id: int) -> None:
+    """Print stored LLM analysis for one ID from the JSONL manifest."""
+    print(f"=== Summary for poem {gutenberg_id} ===\n")
+    record = load_last_jsonl_record_for_id(JSONL_PATH, gutenberg_id)
+    if record is None:
+        print(
+            f"  No analysis found for gutenberg_id {gutenberg_id} in {JSONL_PATH}.\n"
+            f"  Run: python llm_analysis.py --gutenberg-id {gutenberg_id} --step analyze\n"
+        )
+        return
+    print_poem_analysis_summary(record)
+
+
+def run_report_single_poem(gutenberg_id: int) -> None:
+    """Print a short report for one poem if present in the JSONL results."""
+    print(f"=== Report: poem {gutenberg_id} ===\n")
+    record = load_last_jsonl_record_for_id(JSONL_PATH, gutenberg_id)
+    if record is None:
+        print(f"  No record for {gutenberg_id} in {JSONL_PATH}.\n")
+        return
+    if record.get("llm_parse_error"):
+        print("  Status: parse error (see JSONL line for details).\n")
+        return
+    print(f"  content_type={record.get('content_type')}  viz={record.get('visualization_suitability')}/5")
+    print(f"  primary_theme={record.get('primary_theme')}")
+    print(f"  primary_nature_setting={record.get('primary_nature_setting')}\n")
+
+
 # ─── Step: Summarize ──────────────────────────────────────────────────────────
 
 SUMMARY_COLUMNS = [
@@ -614,22 +788,55 @@ def main():
         default=DEFAULT_MAX_LINES,
         help=f"Max poem lines to send to LLM (default: {DEFAULT_MAX_LINES})",
     )
+    parser.add_argument(
+        "--gutenberg-id",
+        type=int,
+        default=None,
+        metavar="ID",
+        help="Analyze or print summary for a single poem (bypasses shortlist/catalog)",
+    )
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="With --gutenberg-id: re-call the API even if this ID already exists in JSONL",
+    )
     args = parser.parse_args()
 
-    if args.step in ("analyze", "all"):
-        run_analysis(
-            source=args.source,
-            limit=args.limit,
-            delay=args.delay,
-            model=args.model,
-            max_lines=args.max_lines,
-        )
+    single_id = args.gutenberg_id
 
-    if args.step in ("summarize", "all"):
-        run_summarize()
+    if single_id is not None:
+        if args.step in ("analyze", "all"):
+            run_single_poem_analysis(
+                gutenberg_id=single_id,
+                model=args.model,
+                max_lines=args.max_lines,
+                delay=args.delay,
+                force=args.force,
+            )
+        if args.step == "summarize":
+            run_summarize_single_poem(single_id)
+            run_summarize()
+        elif args.step == "all":
+            run_summarize()
+        if args.step == "report":
+            run_report_single_poem(single_id)
+        elif args.step == "all":
+            run_report()
+    else:
+        if args.step in ("analyze", "all"):
+            run_analysis(
+                source=args.source,
+                limit=args.limit,
+                delay=args.delay,
+                model=args.model,
+                max_lines=args.max_lines,
+            )
 
-    if args.step in ("report", "all"):
-        run_report()
+        if args.step in ("summarize", "all"):
+            run_summarize()
+
+        if args.step in ("report", "all"):
+            run_report()
 
     print("Done.")
 
