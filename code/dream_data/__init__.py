@@ -28,6 +28,7 @@ from .prompts import (  # noqa: E402
     DEFAULT_STYLE_TAIL,
     build_sdxl_prompt,
 )
+from .mood import mood_to_strength, stanza_intensity, stanza_seed  # noqa: E402
 
 __all__ = [
     "DreamDataError",
@@ -40,4 +41,7 @@ __all__ = [
     "DEFAULT_STYLE_TAIL",
     "DEFAULT_STYLE_PROMPT_2",
     "DEFAULT_NEGATIVE_PROMPT",
+    "stanza_intensity",
+    "mood_to_strength",
+    "stanza_seed",
 ]
