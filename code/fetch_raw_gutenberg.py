@@ -40,6 +40,7 @@ OUTPUT_DIR = SCRIPT_DIR / "exploration_output"
 PG_RAW_DIR = OUTPUT_DIR / "pg_raw"
 CACHE_DIR = PG_RAW_DIR / "_cache"
 SHORTLIST_PATH = OUTPUT_DIR / "shortlist.csv"
+CURATION_DIR = SCRIPT_DIR / "curation"
 
 PARQUET_URL = (
     "hf://datasets/biglam/gutenberg-poetry-corpus/data/"
@@ -591,7 +592,8 @@ def cmd_diagnose(args):
             )
 
     PG_RAW_DIR.mkdir(parents=True, exist_ok=True)
-    curated_path = PG_RAW_DIR / "curated_ids.csv"
+    CURATION_DIR.mkdir(parents=True, exist_ok=True)
+    curated_path = CURATION_DIR / "curated_ids.csv"
     skipped_path = PG_RAW_DIR / "skipped.csv"
 
     with open(curated_path, "w", newline="", encoding="utf-8") as f:
