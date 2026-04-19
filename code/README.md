@@ -182,6 +182,40 @@ Once `poem_<id>.txt` exists, `clip_pipeline.py` will automatically prefer it as 
 
 ---
 
+### Step 4.8 — Alignment Report (corpus-scale sanity check)
+
+Before wiring poems into the dream pipeline at scale, produce a
+batch alignment summary over the curated IDs:
+
+```bash
+python -m scripts.alignment_report \
+  --ids-csv curation/curated_ids.csv \
+  --pg-raw exploration_output/pg_raw \
+  --out exploration_output/alignment_report
+# -> exploration_output/alignment_report.csv + .json
+```
+
+Each row has `{gutenberg_id, status, match_rate, stanza_count, warning}`.
+Rows with `status=failed` (e.g. **poem 24449** at `match_rate=0.9362`)
+should NOT be sent through `clip_pipeline.retrieve` because stanza
+boundaries are wrong — use poem **9825** (match_rate 1.0000, 12
+stanzas) for the MVP showcase instead.
+
+#### Tunable threshold
+
+`fetch_raw_gutenberg.py`'s `MATCH_THRESHOLD` defaults to `0.98` and can
+be lowered via the `PG_RAW_MIN_MATCH_RATE` environment variable while
+debugging:
+
+```bash
+PG_RAW_MIN_MATCH_RATE=0.90 python fetch_raw_gutenberg.py diagnose --ids 24449
+```
+
+**Do not** ship the dream video on a relaxed threshold — it produces
+mis-mapped moods. Use it only to investigate *why* a poem failed.
+
+---
+
 ### Step 4.9 — Dream-pipeline Preflight
 
 Before running the GPU-heavy dream pipeline (SDXL + RIFE + FFmpeg),
