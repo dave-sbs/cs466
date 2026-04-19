@@ -61,6 +61,7 @@ from dream_sdxl import (
     write_keyframe_manifest,
 )
 from .artifacts import DreamArtifacts, FrameManifest, write_frame_manifest
+from dream_meta import write_meta
 
 
 log = logging.getLogger("dream_render")
@@ -363,6 +364,41 @@ def render_dream_video(
             fade_out_seconds=cfg.fade_out_seconds,
         )
 
+    # 7. meta.json for the run (S10-T0/T2/T3).
+    meta_path = run_dir / "meta.json"
+    run_config_dict = {
+        "gutenberg_id": cfg.gutenberg_id,
+        "data_root": str(cfg.data_root),
+        "run_dir": str(cfg.run_dir),
+        "fps": cfg.fps,
+        "rife_depth": cfg.rife_depth,
+        "max_zoom": cfg.max_zoom,
+        "image_size": list(cfg.image_size),
+        "num_inference_steps": cfg.num_inference_steps,
+        "guidance_scale": cfg.guidance_scale,
+        "fade_in_seconds": cfg.fade_in_seconds,
+        "fade_out_seconds": cfg.fade_out_seconds,
+        "start_stanza": cfg.start_stanza,
+        "end_stanza": cfg.end_stanza,
+        "force": cfg.force,
+        "mock_gpu": mock_gpu,
+    }
+    write_meta(
+        meta_path,
+        gutenberg_id=cfg.gutenberg_id,
+        model_id=cfg.model_id,
+        revision=cfg.revision,
+        run_config=run_config_dict,
+        artifacts={
+            "run_dir": str(run_dir),
+            "frames_dir": str(frames_dir),
+            "keyframes_dir": str(keyframes_dir),
+            "keyframe_manifest": str(keyframe_manifest_path),
+            "frame_manifest": str(frame_manifest_path),
+            "mp4": str(mp4_path) if mp4_path else "",
+        },
+    )
+
     return DreamArtifacts(
         run_dir=run_dir,
         frames_dir=frames_dir,
@@ -370,5 +406,5 @@ def render_dream_video(
         keyframe_manifest=keyframe_manifest_path,
         frame_manifest=frame_manifest_path,
         mp4=mp4_path,
-        meta=None,  # filled in by dream_meta.write_meta (S10)
+        meta=meta_path,
     )
