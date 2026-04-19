@@ -16,5 +16,16 @@ class DreamDataError(ValueError):
 
 
 from .loaders import load_last_llm_record  # noqa: E402
+from .manifest import (  # noqa: E402
+    load_retrieval_manifest,
+    pair_scenes_with_chunks,
+    sort_manifest_results,
+)
 
-__all__ = ["DreamDataError", "load_last_llm_record"]
+__all__ = [
+    "DreamDataError",
+    "load_last_llm_record",
+    "load_retrieval_manifest",
+    "pair_scenes_with_chunks",
+    "sort_manifest_results",
+]
