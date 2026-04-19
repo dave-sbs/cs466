@@ -15,6 +15,7 @@ from dream_data import (
     load_retrieval_manifest,
     pair_scenes_with_chunks,
     resolve_top1_image_path,
+    stanza_intensity,
     validate_llm_record,
 )
 
@@ -37,6 +38,8 @@ class PreflightReport:
     num_scenes: int | None = None
     num_chunks: int | None = None
     num_image_paths_checked: int = 0
+    plan_total_frames: int | None = None
+    plan_duration_seconds: float | None = None
     errors: list[str] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
 
@@ -67,6 +70,9 @@ def run_preflight(
     data_root: str | Path,
     llm_jsonl: str | Path | None = None,
     manifest_path: str | Path | None = None,
+    plan: bool = False,
+    rife_depth: int = 4,
+    fps: int = 30,
 ) -> PreflightReport:
     """Run all preflight checks and return a ``PreflightReport``.
 
@@ -163,5 +169,22 @@ def run_preflight(
     ):
         # Already reported as error above; leave.
         pass
+
+    # ----- Plan estimate (S2-T7) -----
+    if plan and record is not None and report.num_scenes:
+        try:
+            from dream_frames import build_segment_plan
+
+            intensities = [
+                stanza_intensity(i, report.num_scenes, record["mood_arc"])
+                for i in range(report.num_scenes)
+            ]
+            seg_plan = build_segment_plan(
+                intensities, rife_depth=rife_depth, fps=fps
+            )
+            report.plan_total_frames = seg_plan.total_frames
+            report.plan_duration_seconds = seg_plan.duration_seconds
+        except Exception as e:  # pragma: no cover - guarded, surfaced as error
+            report.add_error(f"plan estimate failed: {e}")
 
     return report

@@ -56,6 +56,27 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Emit a stable JSON report to stdout instead of human text.",
     )
+    p.add_argument(
+        "--plan-only",
+        action="store_true",
+        help=(
+            "Also compute an estimated segment plan (total frames and "
+            "duration in seconds) using the mood arc in the LLM record. "
+            "Does not touch GPU or render anything."
+        ),
+    )
+    p.add_argument(
+        "--rife-depth",
+        type=int,
+        default=4,
+        help="RIFE recursion depth for plan estimate (default: 4).",
+    )
+    p.add_argument(
+        "--fps",
+        type=int,
+        default=30,
+        help="Frames per second for plan estimate (default: 30).",
+    )
     return p
 
 
@@ -68,6 +89,9 @@ def main(argv: list[str] | None = None) -> int:
         data_root=args.data_root,
         llm_jsonl=args.llm_jsonl,
         manifest_path=args.manifest,
+        plan=args.plan_only,
+        rife_depth=args.rife_depth,
+        fps=args.fps,
     )
 
     if args.json:
@@ -82,6 +106,11 @@ def main(argv: list[str] | None = None) -> int:
         print(f"  scenes:    {report.num_scenes}")
         print(f"  chunks:    {report.num_chunks}")
         print(f"  images checked: {report.num_image_paths_checked}")
+        if report.plan_total_frames is not None:
+            print(
+                f"  plan: {report.plan_total_frames} frames "
+                f"(~{report.plan_duration_seconds:.2f}s)"
+            )
         for w in report.warnings:
             print(f"  [warn] {w}")
         for e in report.errors:

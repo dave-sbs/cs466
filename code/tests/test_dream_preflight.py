@@ -132,6 +132,29 @@ def test_cli_json_ok(tmp_path: Path, minimal_llm_record, minimal_manifest_dict, 
     assert list(report.keys()) == sorted(report.keys())
 
 
+def test_cli_plan_only_returns_frame_totals(
+    tmp_path: Path, minimal_llm_record, minimal_manifest_dict, capsys
+):
+    _stage(tmp_path, minimal_llm_record, minimal_manifest_dict)
+    rc = main(
+        [
+            "--gutenberg-id",
+            "9825",
+            "--data-root",
+            str(tmp_path),
+            "--json",
+            "--plan-only",
+        ]
+    )
+    assert rc == 0
+    report = json.loads(capsys.readouterr().out)
+    assert report["ok"] is True
+    # Plan estimate populated
+    assert isinstance(report["plan_total_frames"], int)
+    assert report["plan_total_frames"] > 0
+    assert report["plan_duration_seconds"] > 0
+
+
 def test_cli_json_failure_nonzero(tmp_path: Path, capsys):
     rc = main(
         [
