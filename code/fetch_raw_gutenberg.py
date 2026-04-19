@@ -59,7 +59,7 @@ DEFAULT_VALIDATION_IDS = (10469, 1545, 163, 24449, 1974, 1322)
 ANTHOLOGY_NONBLANK_RATIO = 2.0
 # Known large anthology-style IDs from project validation (defer poem file).
 KNOWN_ANTHOLOGY_IDS = frozenset({1322})
-MATCH_THRESHOLD = 0.98
+MATCH_THRESHOLD = float(os.environ.get("PG_RAW_MIN_MATCH_RATE", "0.98"))
 
 
 def gutenberg_txt_url(gutenberg_id: int) -> str:
