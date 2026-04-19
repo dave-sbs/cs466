@@ -29,6 +29,7 @@ from .prompts import (  # noqa: E402
     build_sdxl_prompt,
 )
 from .mood import mood_to_strength, stanza_intensity, stanza_seed  # noqa: E402
+from .validate import validate_llm_record  # noqa: E402
 
 __all__ = [
     "DreamDataError",
@@ -44,4 +45,5 @@ __all__ = [
     "stanza_intensity",
     "mood_to_strength",
     "stanza_seed",
+    "validate_llm_record",
 ]
