@@ -19,6 +19,7 @@ os.environ.setdefault("KMP_DUPLICATE_LIB_OK", "TRUE")
 import json
 import argparse
 import shutil
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -43,6 +44,9 @@ IMAGE_IDS_PATH = DATA_DIR / "image_ids.json"
 FAISS_INDEX_PATH = DATA_DIR / "faiss_index.bin"
 
 OUTPUT_DIR = Path("output/retrieval_results")
+
+# Aligned Project Gutenberg text with blank-line stanza markers (see fetch_raw_gutenberg.py)
+PG_RAW_POEM_DIR = Path("exploration_output/pg_raw")
 
 SUPPORTED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
 
@@ -174,33 +178,48 @@ def build_index():
 
 # ─── Poem Loading ─────────────────────────────────────────────────────────────
 
-def load_poem_lines(gutenberg_id: int) -> list:
-    """Load poem lines from the stratified samples or general samples directory."""
+def load_poem_lines(gutenberg_id: int) -> tuple[list[str], str]:
+    """
+    Load poem lines and record source.
+
+    Returns (lines, source) where source is:
+      - 'pg_raw' — aligned Gutenberg text; may include blank lines between stanzas
+      - 'samples_stratified' | 'samples' — parquet-derived excerpts (no stanza blanks)
+    """
+    pg_path = PG_RAW_POEM_DIR / f"poem_{gutenberg_id}.txt"
+    if pg_path.exists():
+        with open(pg_path, encoding="utf-8") as f:
+            return f.read().splitlines(), "pg_raw"
+
     candidates = [
-        Path("exploration_output/samples_stratified") / f"poem_{gutenberg_id}.txt",
-        Path("samples") / f"poem_{gutenberg_id}.txt",
+        (Path("exploration_output/samples_stratified"), "samples_stratified"),
+        (Path("samples"), "samples"),
     ]
-    for p in candidates:
+    for folder, label in candidates:
+        p = folder / f"poem_{gutenberg_id}.txt"
         if p.exists():
             with open(p, encoding="utf-8") as f:
-                return [line for line in f.read().splitlines() if line.strip()]
+                lines = [line for line in f.read().splitlines() if line.strip()]
+            return lines, label
+
     raise FileNotFoundError(
         f"Poem {gutenberg_id} not found. "
-        f"Run explore_corpus.py --step sample or exploration.py to extract it first."
+        f"Run explore_corpus.py --step sample, or fetch_raw_gutenberg.py all --ids {gutenberg_id}."
     )
 
 
 def chunk_lines(lines: list, chunk_size: int) -> list:
-    """Split poem lines into chunks of chunk_size, preserving context."""
+    """Split poem lines into chunks of chunk_size (non-empty lines only)."""
+    nonempty = [line.strip() for line in lines if line.strip()]
     chunks = []
-    for i in range(0, len(lines), chunk_size):
-        chunk = lines[i : i + chunk_size]
+    for i in range(0, len(nonempty), chunk_size):
+        chunk = nonempty[i : i + chunk_size]
         chunks.append(" / ".join(chunk))
     return chunks
 
 
 def split_into_stanzas(lines: list) -> list:
-    """Split by blank lines into stanzas; fall back to chunk_lines if no blanks."""
+    """Split by blank lines into stanzas."""
     stanzas = []
     current = []
     for line in lines:
@@ -212,7 +231,15 @@ def split_into_stanzas(lines: list) -> list:
             current.append(line.strip())
     if current:
         stanzas.append(" / ".join(current))
-    return stanzas if stanzas else [" / ".join(lines)]
+    if not stanzas:
+        return []
+    if len(stanzas) == 1 and not any(l.strip() == "" for l in lines):
+        print(
+            "[warn] split_into_stanzas: no blank lines in source; "
+            "would produce a single whole-text chunk — caller should use chunk_lines.",
+            file=sys.stderr,
+        )
+    return stanzas
 
 
 # ─── Step 3: Retrieve ─────────────────────────────────────────────────────────
@@ -253,13 +280,30 @@ def retrieve(
         poem_name = "custom_text"
         print(f"Query text: \"{text[:80]}{'...' if len(text) > 80 else ''}\"\n")
     elif gutenberg_id is not None:
-        lines = load_poem_lines(gutenberg_id)
-        print(f"Poem {gutenberg_id}: {len(lines)} lines\n")
-        queries = (
-            split_into_stanzas(lines)
-            if use_stanzas
-            else chunk_lines(lines, chunk_size)
-        )
+        lines, text_source = load_poem_lines(gutenberg_id)
+        n_nonempty = sum(1 for l in lines if l.strip())
+        print(f"Poem {gutenberg_id}: {n_nonempty} non-empty lines (source={text_source})\n")
+
+        if use_stanzas and text_source != "pg_raw":
+            print(
+                f"[warn] No aligned pg_raw text for poem {gutenberg_id}; "
+                f"using fixed-size chunks (chunk_size={chunk_size}), not stanza split.",
+                file=sys.stderr,
+            )
+            queries = chunk_lines(lines, chunk_size)
+        elif use_stanzas:
+            stanzas = split_into_stanzas(lines)
+            if len(stanzas) == 1 and not any(l.strip() == "" for l in lines):
+                print(
+                    f"[warn] Stanza split has no blank-line markers; "
+                    f"using fixed-size chunks (chunk_size={chunk_size}) instead of one whole-poem query.",
+                    file=sys.stderr,
+                )
+                queries = chunk_lines(lines, chunk_size)
+            else:
+                queries = stanzas
+        else:
+            queries = chunk_lines(lines, chunk_size)
         poem_name = f"poem_{gutenberg_id}"
     else:
         print("Provide --gutenberg_id or --text.")
