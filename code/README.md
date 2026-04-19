@@ -147,13 +147,13 @@ Retrieve the top-K most visually similar images for each stanza of a poem:
 
 ```bash
 # By Gutenberg ID (prefer IDs from curation/curated_ids.csv)
-python clip_pipeline.py --step retrieve --gutenberg_id 24449
+python clip_pipeline.py --step retrieve --gutenberg_id 9825
 
 # By free-form text query
 python clip_pipeline.py --step retrieve --text "dark forest at dusk, mist rising"
 
 # With custom chunk size and top-K
-python clip_pipeline.py --step retrieve --gutenberg_id 24449 --top_k 10 --chunk_size 8
+python clip_pipeline.py --step retrieve --gutenberg_id 9825 --top_k 10 --chunk_size 8
 ```
 
 Poems are split into stanzas (or fixed-size chunks). Each chunk is encoded with CLIP's text encoder and queried against the FAISS index.
@@ -182,6 +182,37 @@ Once `poem_<id>.txt` exists, `clip_pipeline.py` will automatically prefer it as 
 
 ---
 
+### Step 4.9 — Dream-pipeline Preflight
+
+Before running the GPU-heavy dream pipeline (SDXL + RIFE + FFmpeg),
+verify the data layout with the preflight CLI:
+
+```bash
+python -m dream_preflight --gutenberg-id 9825 --data-root . --json
+# → exits 0 with {"ok": true, ...} when every check passes
+```
+
+What preflight verifies:
+
+- `exploration_output/llm_analysis.jsonl` contains a record for
+  `--gutenberg-id` and passes `validate_llm_record` (scenes present,
+  mood_arc length 3, intensities in 1..5).
+- `output/retrieval_results/poem_<id>/retrieval_manifest.json` loads
+  and has the same number of chunks as `visual_scenes`.
+- Every top-1 `image_id` resolves to an existing file under
+  `data/images/`.
+
+Run from Colab too — `DATA_ROOT` there is typically `/content/drive/MyDrive/...`:
+
+```bash
+python -m dream_preflight --gutenberg-id 9825 --data-root /content/drive/MyDrive/poetry_dream
+```
+
+Non-zero exit status signals at least one blocker. Use `--json` to
+parse the report from a notebook cell or shell script.
+
+---
+
 ### Step 5 — Qualitative Evaluation
 
 Generate self-contained HTML galleries for visual inspection of retrieval quality:
@@ -189,7 +220,7 @@ Generate self-contained HTML galleries for visual inspection of retrieval qualit
 ```bash
 python evaluate_retrieval.py                          # All shortlisted poems
 python evaluate_retrieval.py --top_n 5                # Top 5 from shortlist
-python evaluate_retrieval.py --ids 24449 9825 36305   # Specific poems by ID
+python evaluate_retrieval.py --ids 9825 36305         # Specific poems by ID
 python evaluate_retrieval.py --top_k 5 --chunk_size 6
 ```
 
