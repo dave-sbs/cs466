@@ -54,3 +54,19 @@ code/samples/
 # Report files
 video/
 research/
+
+# Dream pipeline outputs
+code/output/dream/
+code/output/dream_runs/
+
+# Test/coverage artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# Model / HF caches (if they end up under repo root by accident)
+.cache/
+hf_home/
+rife_weights/
+
