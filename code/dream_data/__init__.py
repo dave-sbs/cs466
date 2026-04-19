@@ -15,4 +15,6 @@ class DreamDataError(ValueError):
     """Raised when LLM analysis and retrieval manifest disagree or are malformed."""
 
 
-__all__ = ["DreamDataError"]
+from .loaders import load_last_llm_record  # noqa: E402
+
+__all__ = ["DreamDataError", "load_last_llm_record"]
