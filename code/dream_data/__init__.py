@@ -21,6 +21,7 @@ from .manifest import (  # noqa: E402
     pair_scenes_with_chunks,
     sort_manifest_results,
 )
+from .paths import resolve_top1_image_path  # noqa: E402
 
 __all__ = [
     "DreamDataError",
@@ -28,4 +29,5 @@ __all__ = [
     "load_retrieval_manifest",
     "pair_scenes_with_chunks",
     "sort_manifest_results",
+    "resolve_top1_image_path",
 ]
