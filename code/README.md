@@ -21,6 +21,8 @@ code/
 │   ├── embeddings.npy        # CLIP image embeddings (not tracked in git)
 │   ├── faiss_index.bin       # FAISS index (not tracked in git)
 │   └── image_ids.json        # Ordered list of image filenames
+├── curation/
+│   └── curated_ids.csv        # Committable set of stanza-preserving poems (generated)
 ├── exploration_output/
 │   ├── corpus_catalog.csv    # Per-poem metadata for all corpus poems
 │   ├── shortlist.csv         # Ranked visualization candidates
@@ -144,7 +146,7 @@ python clip_pipeline.py
 Retrieve the top-K most visually similar images for each stanza of a poem:
 
 ```bash
-# By Gutenberg ID (poem must be extracted first — see Step 1)
+# By Gutenberg ID (prefer IDs from curation/curated_ids.csv)
 python clip_pipeline.py --step retrieve --gutenberg_id 24449
 
 # By free-form text query
@@ -157,6 +159,26 @@ python clip_pipeline.py --step retrieve --gutenberg_id 24449 --top_k 10 --chunk_
 Poems are split into stanzas (or fixed-size chunks). Each chunk is encoded with CLIP's text encoder and queried against the FAISS index.
 
 **Outputs:** `output/retrieval_results/<poem_id>/`
+
+---
+
+### Step 4.5 — Curate Stanza-Preserving Poems (Project Gutenberg)
+
+The parquet corpus does **not** preserve blank lines, so stanza boundaries must be recovered from Project Gutenberg raw `.txt` files.
+
+This diagnostic fetches raw PG text, strips boilerplate, trims the text to the span covered by the parquet poem (first→last line), aligns it back to parquet, and writes stanza-preserving poem files.
+
+```bash
+# Curate poems from the shortlist with line_count <= 500
+python fetch_raw_gutenberg.py diagnose --max_lines 500 --sleep 0.2
+```
+
+**Outputs:**
+- `curation/curated_ids.csv` — poems that align well and have >=2 stanzas
+- `exploration_output/pg_raw/poem_<id>.txt` — stanza-preserving poem text (blank lines kept)
+- `exploration_output/pg_raw/skipped.csv` — failures with a reason (e.g. wrong ebook / missing content)
+
+Once `poem_<id>.txt` exists, `clip_pipeline.py` will automatically prefer it as the stanza-aware source.
 
 ---
 

@@ -38,6 +38,7 @@ code/data/faiss_index.bin
 # Generated outputs (reproducible)
 code/output/retrieval_results/
 code/output/galleries/
+code/exploration_output/pg_raw/
 code/exploration_output/samples_stratified/
 code/exploration_output/prompts_individual/
 code/exploration_output/plots/
