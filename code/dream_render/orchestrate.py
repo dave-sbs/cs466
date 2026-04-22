@@ -241,6 +241,22 @@ def render_dream_video(
         init_path = resolve_top1_image_path(cfg.data_root, image_id)
         out_path = keyframes_dir / f"kf_{stanza_idx:03d}.png"
 
+        log.info(
+            "stanza %d/%d: intensity=%d strength=%.2f seed=%d image_id=%s",
+            stanza_idx,
+            num_stanzas - 1,
+            intensity,
+            strength,
+            seed,
+            image_id,
+        )
+        log.info(
+            "stanza %d/%d: prompt=%r",
+            stanza_idx,
+            num_stanzas - 1,
+            (prompt[:200] + "..." if len(prompt) > 200 else prompt),
+        )
+
         prior = existing.get(stanza_idx)
         if (
             prior is not None
@@ -283,6 +299,13 @@ def render_dream_video(
             )
         )
         keyframe_images.append(out_path)
+        log.info(
+            "stanza %d/%d: wrote %s sha256=%s",
+            stanza_idx,
+            num_stanzas - 1,
+            out_path.name,
+            entries[-1].sha256[:8],
+        )
 
     # 4. Write keyframe manifest (after each keyframe loop — guards resume).
     write_keyframe_manifest(
