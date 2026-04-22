@@ -48,18 +48,22 @@ def sort_manifest_results(manifest: dict[str, Any]) -> list[dict[str, Any]]:
 def pair_scenes_with_chunks(
     llm_record: dict[str, Any], manifest: dict[str, Any]
 ) -> list[tuple[dict[str, Any], dict[str, Any]]]:
-    """Zip LLM visual_scenes with manifest results after asserting equal length.
+    """Pair LLM visual_scenes with manifest results by chunk index.
 
-    Returns a list of ``(scene, chunk_result)`` tuples in chunk_index order.
+    Returns a list of ``(scene, chunk_result)`` tuples in ``chunk_index`` order.
 
-    Raises ``DreamDataError`` with both counts in the message if lengths differ.
+    This joins by ``scene['stanza_index']`` and ``chunk['chunk_index']`` rather
+    than zipping by position. That makes pairing robust to out-of-order lists and
+    surfaces missing indices clearly.
     """
     scenes = list(llm_record.get("visual_scenes") or [])
     results = sort_manifest_results(manifest)
-    if len(scenes) != len(results):
+    scenes_by_idx = {s.get("stanza_index"): s for s in scenes}
+    chunks_by_idx = {c.get("chunk_index"): c for c in results}
+    missing = set(scenes_by_idx.keys()) ^ set(chunks_by_idx.keys())
+    if missing:
         raise DreamDataError(
-            "visual_scenes/retrieval count mismatch: "
-            f"{len(scenes)} scenes vs {len(results)} chunks "
-            f"(gutenberg_id={llm_record.get('gutenberg_id')!r})"
+            "scene/chunk index mismatch: "
+            f"{sorted(missing)} (gutenberg_id={llm_record.get('gutenberg_id')!r})"
         )
-    return list(zip(scenes, results))
+    return [(scenes_by_idx[i], chunks_by_idx[i]) for i in sorted(chunks_by_idx)]

@@ -86,7 +86,7 @@ def test_pair_success(minimal_llm_record, minimal_manifest_dict):
 def test_pair_length_mismatch_raises(minimal_llm_record, minimal_manifest_dict):
     short = dict(minimal_llm_record)
     short["visual_scenes"] = minimal_llm_record["visual_scenes"][:1]
-    with pytest.raises(DreamDataError, match="1 scenes vs 2 chunks") as exc_info:
+    with pytest.raises(DreamDataError, match=r"scene/chunk index mismatch: \[1\]") as exc_info:
         pair_scenes_with_chunks(short, minimal_manifest_dict)
     assert "gutenberg_id=9825" in str(exc_info.value)
 
@@ -96,3 +96,10 @@ def test_pair_respects_chunk_order(minimal_llm_record, minimal_manifest_dict):
     shuffled["results"] = list(reversed(minimal_manifest_dict["results"]))
     pairs = pair_scenes_with_chunks(minimal_llm_record, shuffled)
     assert [c["chunk_index"] for _s, c in pairs] == [0, 1]
+
+
+def test_pair_out_of_order_scenes_still_pairs(minimal_llm_record, minimal_manifest_dict):
+    swapped = dict(minimal_llm_record)
+    swapped["visual_scenes"] = list(reversed(minimal_llm_record["visual_scenes"]))
+    pairs = pair_scenes_with_chunks(swapped, minimal_manifest_dict)
+    assert [s["stanza_index"] for s, _c in pairs] == [0, 1]
