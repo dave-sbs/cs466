@@ -32,6 +32,8 @@ import faiss
 
 from interpretability import compute_line_attributions
 
+from dream_chunks import split_poem
+
 
 # ─── Configuration ────────────────────────────────────────────────────────────
 
@@ -290,20 +292,15 @@ def retrieve(
                 f"using fixed-size chunks (chunk_size={chunk_size}), not stanza split.",
                 file=sys.stderr,
             )
-            queries = chunk_lines(lines, chunk_size)
-        elif use_stanzas:
-            stanzas = split_into_stanzas(lines)
-            if len(stanzas) == 1 and not any(l.strip() == "" for l in lines):
-                print(
-                    f"[warn] Stanza split has no blank-line markers; "
-                    f"using fixed-size chunks (chunk_size={chunk_size}) instead of one whole-poem query.",
-                    file=sys.stderr,
-                )
-                queries = chunk_lines(lines, chunk_size)
-            else:
-                queries = stanzas
+            chunks = split_poem(lines, fallback_chunk_size=chunk_size)
+            queries = [c.text for c in chunks if c.split_mode == "fixed"]
         else:
-            queries = chunk_lines(lines, chunk_size)
+            chunks = split_poem(lines, fallback_chunk_size=chunk_size)
+            if use_stanzas:
+                stanzas = [c.text for c in chunks if c.split_mode == "stanza"]
+                queries = stanzas if stanzas else [c.text for c in chunks]
+            else:
+                queries = [c.text for c in chunks]
         poem_name = f"poem_{gutenberg_id}"
     else:
         print("Provide --gutenberg_id or --text.")
