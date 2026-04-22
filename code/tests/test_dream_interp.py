@@ -107,7 +107,7 @@ def test_rife_stub_raises_not_implemented_when_root_exists(
     fake_root.mkdir()
     monkeypatch.setenv("RIFE_ROOT", str(fake_root))
     interp = RifeInterpolator()
-    with pytest.raises(InterpolatorError, match="not implemented"):
+    with pytest.raises(InterpolatorError, match="weights not found"):
         interp(_solid(), _solid(), tmp_path / "out", depth=2)
 
 

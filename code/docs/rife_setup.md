@@ -26,6 +26,15 @@ After setup, verify:
 ls "$RIFE_ROOT"/train_log/flownet.pkl
 ```
 
+## Using the prototype driver script
+
+Once `RIFE_ROOT` is set and weights are installed, you can run the prototype
+end-to-end script (poem 9825) with RIFE transitions:
+
+```bash
+%run code/scripts/run_dream_9825.py --use-rife --force
+```
+
 ## Integration with dream_interp
 
 ```python
