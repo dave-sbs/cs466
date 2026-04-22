@@ -236,6 +236,14 @@ What preflight verifies:
 - Every top-1 `image_id` resolves to an existing file under
   `data/images/`.
 
+Chunk contract note:
+
+- Retrieval and LLM analysis must agree on the exact chunking. Both are
+  expected to use **stanza splitting** when blank-line markers exist,
+  with a **fixed-size fallback** when they do not.
+- The LLM record should contain exactly one `visual_scenes` entry per
+  chunk, with sequential `stanza_index` values starting at 0.
+
 Run from Colab too — `DATA_ROOT` there is typically `/content/drive/MyDrive/...`:
 
 ```bash
