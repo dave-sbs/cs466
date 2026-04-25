@@ -122,11 +122,12 @@ def load_wan_flf2v_pipeline(cfg: WanFlf2vConfig):
         image_encoder=image_encoder,
         torch_dtype=torch_dtype,
     )
-    pipe.to("cuda")
 
     if cfg.enable_model_cpu_offload and hasattr(pipe, "enable_model_cpu_offload"):
         # Frees VRAM during forward pass on large models (A100 recommended).
         pipe.enable_model_cpu_offload()
+    else: 
+        pipe.to("cuda")
 
     return pipe
 
