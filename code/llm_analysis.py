@@ -33,8 +33,10 @@ from pathlib import Path
 
 import requests
 import pandas as pd
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, ValidationError, model_validator
 from dotenv import load_dotenv
+
+from dream_chunks import split_poem
 
 load_dotenv()
 
@@ -76,6 +78,7 @@ class MoodPoint(BaseModel):
 
 
 class PoemAnalysis(BaseModel):
+    num_chunks: int
     is_poem: bool
     content_type: str
     content_type_rationale: str
@@ -98,6 +101,24 @@ class PoemAnalysis(BaseModel):
     visualization_rationale: str
     most_visual_stanzas: list[int]
     notable_lines: list[str]
+
+    @model_validator(mode="after")
+    def _validate_visual_scenes_contract(self) -> "PoemAnalysis":
+        if self.num_chunks <= 0:
+            raise ValueError("num_chunks must be positive")
+        if len(self.visual_scenes) != self.num_chunks:
+            raise ValueError(
+                f"visual_scenes length must equal num_chunks "
+                f"({len(self.visual_scenes)} vs {self.num_chunks})"
+            )
+        indices = [s.stanza_index for s in self.visual_scenes]
+        expected = list(range(self.num_chunks))
+        if indices != expected:
+            raise ValueError(
+                f"visual_scenes stanza_index must be sequential 0..{self.num_chunks - 1} "
+                f"(got {indices})"
+            )
+        return self
 
 
 # ─── Data Loading ─────────────────────────────────────────────────────────────
@@ -264,6 +285,7 @@ SYSTEM_PROMPT = """\
 You are a literary analyst specializing in poetry for visual media adaptation.
 Given a poem excerpt, produce a JSON object with EXACTLY this structure (no extra keys):
 {
+  "num_chunks": integer number of stanza/chunk blocks provided in the input,
   "is_poem": true or false,
   "content_type": "poem | collection | table_of_contents | preface | biography | disclaimer | index | mixed | other",
   "content_type_rationale": "1 sentence explaining classification",
@@ -301,8 +323,12 @@ Given a poem excerpt, produce a JSON object with EXACTLY this structure (no extr
 }
 
 Guidelines:
-- For visual_scenes, create one entry per stanza (or per major section if the poem is long).
-  Write scene_description as if describing a photograph — concrete objects, lighting, colors.
+- For visual_scenes, create exactly one entry per stanza, where a stanza is a block
+  of lines separated by one or more blank lines in the input. Do not skip stanzas
+  and do not merge stanzas, even in long poems. The resulting visual_scenes array
+  length MUST equal the number of stanzas.
+- Use sequential stanza_index values starting at 0 (0, 1, 2, ... N-1).
+- Write scene_description as if describing a photograph — concrete objects, lighting, colors.
   Example: "A dark pine forest at twilight with mist rising between ancient trunks, faint moonlight filtering through branches"
 - For mood_arc, always include exactly 3 entries: opening, middle, closing. Intensity is 1-5.
 - For nature_categories, use specific categories: ocean, sea, river, lake, mountain, forest, meadow, desert, garden, sky, cliff, cave, island, snow, storm, field, swamp, prairie, shore, valley.
@@ -315,13 +341,16 @@ Respond ONLY with valid JSON."""
 def build_messages(lines: list[str], gid: int, line_count: int, max_lines: int) -> list[dict[str, str]]:
     """Build the system + user message pair for a poem."""
     truncated = lines[:max_lines]
-    poem_text = "\n".join(truncated)
+    chunks = split_poem(truncated, fallback_chunk_size=8)
     note = f" (showing first {max_lines} of {line_count} lines)" if line_count > max_lines else ""
 
+    chunk_block = "\n".join([f"[Chunk {c.chunk_index}] {c.text}" for c in chunks])
     user_msg = (
         f"Analyze this poem (Gutenberg ID: {gid}, {line_count} lines{note}).\n"
         f"Focus on visual/cinematic potential for nature-themed video visualization.\n\n"
-        f"{poem_text}"
+        f"Input is pre-split into {len(chunks)} numbered chunks. "
+        f"Return num_chunks={len(chunks)} and EXACTLY one visual_scenes entry per chunk.\n\n"
+        f"{chunk_block}"
     )
 
     return [

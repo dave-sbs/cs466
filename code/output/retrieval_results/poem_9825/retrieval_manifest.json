@@ -1,0 +1,440 @@
+{
+  "poem_name": "poem_9825",
+  "gutenberg_id": 9825,
+  "num_chunks": 12,
+  "top_k": 5,
+  "results": [
+    {
+      "chunk_index": 0,
+      "query_text": "O winter! frozen pulse and heart of fire, / What loss is theirs who from thy kingdom turn / Dismayed, and think thy snow a sculptured urn / Of death! Far sooner in midsummer tire / The streams than under ice. June could not hire / Her roses to forego the strength they learn / In sleeping on thy breast. No fires can burn / The bridges thou dost lay where men desire / In vain to build. / O Heart, when Love's sun goes / To northward, and the sounds of singing cease, / Keep warm by inner fires, and rest in peace. / Sleep on content, as sleeps the patient rose. / Walk boldly on the white untrodden snows, / The winter is the winter's own release.",
+      "top_k": [
+        {
+          "rank": 1,
+          "score": 0.2572421431541443,
+          "image_id": "00879.jpg",
+          "output_file": "chunk000_rank1_00879.jpg"
+        },
+        {
+          "rank": 2,
+          "score": 0.25618547201156616,
+          "image_id": "00077.jpg",
+          "output_file": "chunk000_rank2_00077.jpg"
+        },
+        {
+          "rank": 3,
+          "score": 0.25344187021255493,
+          "image_id": "00449.jpg",
+          "output_file": "chunk000_rank3_00449.jpg"
+        },
+        {
+          "rank": 4,
+          "score": 0.24731159210205078,
+          "image_id": "00910.jpg",
+          "output_file": "chunk000_rank4_00910.jpg"
+        },
+        {
+          "rank": 5,
+          "score": 0.2454167753458023,
+          "image_id": "01608.jpg",
+          "output_file": "chunk000_rank5_01608.jpg"
+        }
+      ]
+    },
+    {
+      "chunk_index": 1,
+      "query_text": "Still lie the sheltering snows, undimmed and white; / And reigns the winter's pregnant silence still; / No sign of spring, save that the catkins fill, / And willow stems grow daily red and bright. / These are the days when ancients held a rite / Of expiation for the old year's ill, / And prayer to purify the new year's will: / Fit days, ere yet the spring rains blur the sight, / Ere yet the bounding blood grows hot with haste, / And dreaming thoughts grow heavy with a greed / The ardent summer's joy to have and taste; / Fit days, to give to last year's losses heed, / To reckon clear the new life's sterner need; / Fit days, for Feast of Expiation placed!",
+      "top_k": [
+        {
+          "rank": 1,
+          "score": 0.25943896174430847,
+          "image_id": "00669.jpg",
+          "output_file": "chunk001_rank1_00669.jpg"
+        },
+        {
+          "rank": 2,
+          "score": 0.25825396180152893,
+          "image_id": "00077.jpg",
+          "output_file": "chunk001_rank2_00077.jpg"
+        },
+        {
+          "rank": 3,
+          "score": 0.25010165572166443,
+          "image_id": "00910.jpg",
+          "output_file": "chunk001_rank3_00910.jpg"
+        },
+        {
+          "rank": 4,
+          "score": 0.24397900700569153,
+          "image_id": "01739.jpg",
+          "output_file": "chunk001_rank4_01739.jpg"
+        },
+        {
+          "rank": 5,
+          "score": 0.24268695712089539,
+          "image_id": "01634.jpg",
+          "output_file": "chunk001_rank5_01634.jpg"
+        }
+      ]
+    },
+    {
+      "chunk_index": 2,
+      "query_text": "Month which the warring ancients strangely styled / The month of war,--as if in their fierce ways / Were any month of peace!--in thy rough days / I find no war in Nature, though the wild / Winds clash and clang, and broken boughs are piled / At feet of writhing trees. The violets raise / Their heads without affright, without amaze, / And sleep through all the din, as sleeps a child. / And he who watches well may well discern / Sweet expectation in each living thing. / Like pregnant mother the sweet earth doth yearn; / In secret joy makes ready for the spring; / And hidden, sacred, in her breast doth bear / Annunciation lilies for the year.",
+      "top_k": [
+        {
+          "rank": 1,
+          "score": 0.2663097679615021,
+          "image_id": "00808.jpg",
+          "output_file": "chunk002_rank1_00808.jpg"
+        },
+        {
+          "rank": 2,
+          "score": 0.2570638358592987,
+          "image_id": "01768.jpg",
+          "output_file": "chunk002_rank2_01768.jpg"
+        },
+        {
+          "rank": 3,
+          "score": 0.2557772696018219,
+          "image_id": "00637.jpg",
+          "output_file": "chunk002_rank3_00637.jpg"
+        },
+        {
+          "rank": 4,
+          "score": 0.25397589802742004,
+          "image_id": "01492.jpg",
+          "output_file": "chunk002_rank4_01492.jpg"
+        },
+        {
+          "rank": 5,
+          "score": 0.25076407194137573,
+          "image_id": "00522.jpg",
+          "output_file": "chunk002_rank5_00522.jpg"
+        }
+      ]
+    },
+    {
+      "chunk_index": 3,
+      "query_text": "No days such honored days as these! When yet / Fair Aphrodite reigned, men seeking wide / For some fair thing which should forever bide / On earth, her beauteous memory to set / In fitting frame that no age could forget, / Her name in lovely April's name did hide, / And leave it there, eternally allied / To all the fairest flowers Spring did beget. / And when fair Aphrodite passed from earth, / Her shrines forgotten and her feasts of mirth, / A holier symbol still in seal and sign, / Sweet April took, of kingdom most divine, / When Christ ascended, in the time of birth / Of spring anemones, in Palestine.",
+      "top_k": [
+        {
+          "rank": 1,
+          "score": 0.23923395574092865,
+          "image_id": "00808.jpg",
+          "output_file": "chunk003_rank1_00808.jpg"
+        },
+        {
+          "rank": 2,
+          "score": 0.2385614812374115,
+          "image_id": "00522.jpg",
+          "output_file": "chunk003_rank2_00522.jpg"
+        },
+        {
+          "rank": 3,
+          "score": 0.23373137414455414,
+          "image_id": "00832.jpg",
+          "output_file": "chunk003_rank3_00832.jpg"
+        },
+        {
+          "rank": 4,
+          "score": 0.2321593463420868,
+          "image_id": "00802.jpg",
+          "output_file": "chunk003_rank4_00802.jpg"
+        },
+        {
+          "rank": 5,
+          "score": 0.23144985735416412,
+          "image_id": "01611.jpg",
+          "output_file": "chunk003_rank5_01611.jpg"
+        }
+      ]
+    },
+    {
+      "chunk_index": 4,
+      "query_text": "O month when they who love must love and wed! / Were one to go to worlds where May is naught, / And seek to tell the memories he had brought / From earth of thee, what were most fitly said? / I know not if the rosy showers shed / From apple-boughs, or if the soft green wrought / In fields, or if the robin's call be fraught / The most with thy delight. Perhaps they read / Thee best who in the ancient time did say / Thou wert the sacred month unto the old: / No blossom blooms upon thy brightest day / So subtly sweet as memories which unfold / In aged hearts which in thy sunshine lie, / To sun themselves once more before they die.",
+      "top_k": [
+        {
+          "rank": 1,
+          "score": 0.24319778382778168,
+          "image_id": "00832.jpg",
+          "output_file": "chunk004_rank1_00832.jpg"
+        },
+        {
+          "rank": 2,
+          "score": 0.2406405806541443,
+          "image_id": "00449.jpg",
+          "output_file": "chunk004_rank2_00449.jpg"
+        },
+        {
+          "rank": 3,
+          "score": 0.2397124171257019,
+          "image_id": "01492.jpg",
+          "output_file": "chunk004_rank3_01492.jpg"
+        },
+        {
+          "rank": 4,
+          "score": 0.23833605647087097,
+          "image_id": "00808.jpg",
+          "output_file": "chunk004_rank4_00808.jpg"
+        },
+        {
+          "rank": 5,
+          "score": 0.23812364041805267,
+          "image_id": "00951.jpg",
+          "output_file": "chunk004_rank5_00951.jpg"
+        }
+      ]
+    },
+    {
+      "chunk_index": 5,
+      "query_text": "O month whose promise and fulfilment blend, / And burst in one! it seems the earth can store / In all her roomy house no treasure more; / Of all her wealth no farthing have to spend / On fruit, when once this stintless flowering end. / And yet no tiniest flower shall fall before / It hath made ready at its hidden core / Its tithe of seed, which we may count and tend / Till harvest. Joy of blossomed love, for thee / Seems it no fairer thing can yet have birth? / No room is left for deeper ecstasy? / Watch well if seeds grow strong, to scatter free / Germs for thy future summers on the earth. / A joy which is but joy soon comes to dearth.",
+      "top_k": [
+        {
+          "rank": 1,
+          "score": 0.2420080006122589,
+          "image_id": "00449.jpg",
+          "output_file": "chunk005_rank1_00449.jpg"
+        },
+        {
+          "rank": 2,
+          "score": 0.24189472198486328,
+          "image_id": "00951.jpg",
+          "output_file": "chunk005_rank2_00951.jpg"
+        },
+        {
+          "rank": 3,
+          "score": 0.23862221837043762,
+          "image_id": "01492.jpg",
+          "output_file": "chunk005_rank3_01492.jpg"
+        },
+        {
+          "rank": 4,
+          "score": 0.23779457807540894,
+          "image_id": "00808.jpg",
+          "output_file": "chunk005_rank4_00808.jpg"
+        },
+        {
+          "rank": 5,
+          "score": 0.23777621984481812,
+          "image_id": "00879.jpg",
+          "output_file": "chunk005_rank5_00879.jpg"
+        }
+      ]
+    },
+    {
+      "chunk_index": 6,
+      "query_text": "Some flowers are withered and some joys have died; / The garden reeks with an East Indian scent / From beds where gillyflowers stand weak and spent; / The white heat pales the skies from side to side; / But in still lakes and rivers, cool, content, / Like starry blooms on a new firmament, / White lilies float and regally abide. / In vain the cruel skies their hot rays shed; / The lily does not feel their brazen glare. / In vain the pallid clouds refuse to share / Their dews; the lily feels no thirst, no dread. / Unharmed she lifts her queenly face and head; / She drinks of living waters and keeps fair.",
+      "top_k": [
+        {
+          "rank": 1,
+          "score": 0.24338790774345398,
+          "image_id": "00219.jpg",
+          "output_file": "chunk006_rank1_00219.jpg"
+        },
+        {
+          "rank": 2,
+          "score": 0.23090310394763947,
+          "image_id": "00879.jpg",
+          "output_file": "chunk006_rank2_00879.jpg"
+        },
+        {
+          "rank": 3,
+          "score": 0.22905734181404114,
+          "image_id": "01611.jpg",
+          "output_file": "chunk006_rank3_01611.jpg"
+        },
+        {
+          "rank": 4,
+          "score": 0.22863084077835083,
+          "image_id": "01672.jpg",
+          "output_file": "chunk006_rank4_01672.jpg"
+        },
+        {
+          "rank": 5,
+          "score": 0.22834117710590363,
+          "image_id": "00637.jpg",
+          "output_file": "chunk006_rank5_00637.jpg"
+        }
+      ]
+    },
+    {
+      "chunk_index": 7,
+      "query_text": "Silence again. The glorious symphony / Hath need of pause and interval of peace. / Some subtle signal bids all sweet sounds cease, / Save hum of insects' aimless industry. / Pathetic summer seeks by blazonry / Of color to conceal her swift decrease. / Weak subterfuge! Each mocking day doth fleece / A blossom, and lay bare her poverty. / Poor middle-ag\u00e8d summer! Vain this show! / Whole fields of golden-rod cannot offset / One meadow with a single violet; / And well the singing thrush and lily know, / Spite of all artifice which her regret / Can deck in splendid guise, their time to go!",
+      "top_k": [
+        {
+          "rank": 1,
+          "score": 0.24980993568897247,
+          "image_id": "01670.jpg",
+          "output_file": "chunk007_rank1_01670.jpg"
+        },
+        {
+          "rank": 2,
+          "score": 0.2474483847618103,
+          "image_id": "00832.jpg",
+          "output_file": "chunk007_rank2_00832.jpg"
+        },
+        {
+          "rank": 3,
+          "score": 0.24560214579105377,
+          "image_id": "01596.jpg",
+          "output_file": "chunk007_rank3_01596.jpg"
+        },
+        {
+          "rank": 4,
+          "score": 0.24529322981834412,
+          "image_id": "01749.jpg",
+          "output_file": "chunk007_rank4_01749.jpg"
+        },
+        {
+          "rank": 5,
+          "score": 0.24528709053993225,
+          "image_id": "00764.jpg",
+          "output_file": "chunk007_rank5_00764.jpg"
+        }
+      ]
+    },
+    {
+      "chunk_index": 8,
+      "query_text": "O golden month! How high thy gold is heaped! / The yellow birch-leaves shine like bright coins strung / On wands; the chestnut's yellow pennons tongue / To every wind its harvest challenge. Steeped / In yellow, still lie fields where wheat was reaped; / And yellow still the corn sheaves, stacked among / The yellow gourds, which from the earth have wrung / Her utmost gold. To highest boughs have leaped / The purple grape,--last thing to ripen, late / By very reason of its precious cost. / O Heart, remember, vintages are lost / If grapes do not for freezing night-dews wait. / Think, while thou sunnest thyself in Joy's estate, / Mayhap thou canst not ripen without frost!",
+      "top_k": [
+        {
+          "rank": 1,
+          "score": 0.24672502279281616,
+          "image_id": "01179.jpg",
+          "output_file": "chunk008_rank1_01179.jpg"
+        },
+        {
+          "rank": 2,
+          "score": 0.24460840225219727,
+          "image_id": "01492.jpg",
+          "output_file": "chunk008_rank2_01492.jpg"
+        },
+        {
+          "rank": 3,
+          "score": 0.24202698469161987,
+          "image_id": "00841.jpg",
+          "output_file": "chunk008_rank3_00841.jpg"
+        },
+        {
+          "rank": 4,
+          "score": 0.24146698415279388,
+          "image_id": "01434.jpg",
+          "output_file": "chunk008_rank4_01434.jpg"
+        },
+        {
+          "rank": 5,
+          "score": 0.2397449016571045,
+          "image_id": "01944.jpg",
+          "output_file": "chunk008_rank5_01944.jpg"
+        }
+      ]
+    },
+    {
+      "chunk_index": 9,
+      "query_text": "The month of carnival of all the year, / When Nature lets the wild earth go its way / And spend whole seasons on a single day. / The spring-time holds her white and purple dear; / October, lavish, flaunts them far and near; / The summer charily her reds doth lay / October, scornful, burns them on a bier. / The winter hoards his pearls of frost in sign / Of kingdom: whiter pearls than winter knew, / October, feasting 'neath her dome of blue, / Drinks at a single draught, slow filtered through / Sunshiny air, as in a tingling wine!",
+      "top_k": [
+        {
+          "rank": 1,
+          "score": 0.2573632299900055,
+          "image_id": "00400.jpg",
+          "output_file": "chunk009_rank1_00400.jpg"
+        },
+        {
+          "rank": 2,
+          "score": 0.2519029974937439,
+          "image_id": "00306.jpg",
+          "output_file": "chunk009_rank2_00306.jpg"
+        },
+        {
+          "rank": 3,
+          "score": 0.24873599410057068,
+          "image_id": "00984.jpg",
+          "output_file": "chunk009_rank3_00984.jpg"
+        },
+        {
+          "rank": 4,
+          "score": 0.24811814725399017,
+          "image_id": "01179.jpg",
+          "output_file": "chunk009_rank4_01179.jpg"
+        },
+        {
+          "rank": 5,
+          "score": 0.24789200723171234,
+          "image_id": "00304.jpg",
+          "output_file": "chunk009_rank5_00304.jpg"
+        }
+      ]
+    },
+    {
+      "chunk_index": 10,
+      "query_text": "This is the treacherous month when autumn days / With summer's voice come bearing summer's gifts. / Beguiled, the pale down-trodden aster lifts / Her head and blooms again. The soft, warm haze / Makes moist once more the sere and dusty ways, / And, creeping through where dead leaves lie in drifts, / The violet returns. Snow noiseless sifts / Ere night, an icy shroud, which morning's rays / Will idly shine upon and slowly melt, / Too late to bid the violet live again. / The treachery, at last, too late, is plain; / Bare are the places where the sweet flowers dwelt. / What joy sufficient hath November felt? / What profit from the violet's day of pain?",
+      "top_k": [
+        {
+          "rank": 1,
+          "score": 0.2498646080493927,
+          "image_id": "00400.jpg",
+          "output_file": "chunk010_rank1_00400.jpg"
+        },
+        {
+          "rank": 2,
+          "score": 0.24358044564723969,
+          "image_id": "01179.jpg",
+          "output_file": "chunk010_rank2_01179.jpg"
+        },
+        {
+          "rank": 3,
+          "score": 0.24264398217201233,
+          "image_id": "00306.jpg",
+          "output_file": "chunk010_rank3_00306.jpg"
+        },
+        {
+          "rank": 4,
+          "score": 0.24064956605434418,
+          "image_id": "00304.jpg",
+          "output_file": "chunk010_rank4_00304.jpg"
+        },
+        {
+          "rank": 5,
+          "score": 0.2382868081331253,
+          "image_id": "01768.jpg",
+          "output_file": "chunk010_rank5_01768.jpg"
+        }
+      ]
+    },
+    {
+      "chunk_index": 11,
+      "query_text": "The lakes of ice gleam bluer than the lakes / Of water 'neath the summer sunshine gleamed: / Far fairer than when placidly it streamed, / The brook its frozen architecture makes, / And under bridges white its swift way takes. / Snow comes and goes as messenger who dreamed / Might linger on the road; or one who deemed / His message hostile gently for their sakes / Who listened might reveal it by degrees. / We gird against the cold of winter wind / Our loins now with mighty bands of sleep, / In longest, darkest nights take rest and ease, / And every shortening day, as shadows creep / O'er the brief noontide, fresh surprises find.",
+      "top_k": [
+        {
+          "rank": 1,
+          "score": 0.2576894164085388,
+          "image_id": "00879.jpg",
+          "output_file": "chunk011_rank1_00879.jpg"
+        },
+        {
+          "rank": 2,
+          "score": 0.25611984729766846,
+          "image_id": "00449.jpg",
+          "output_file": "chunk011_rank2_00449.jpg"
+        },
+        {
+          "rank": 3,
+          "score": 0.25253409147262573,
+          "image_id": "00077.jpg",
+          "output_file": "chunk011_rank3_00077.jpg"
+        },
+        {
+          "rank": 4,
+          "score": 0.24905377626419067,
+          "image_id": "00637.jpg",
+          "output_file": "chunk011_rank4_00637.jpg"
+        },
+        {
+          "rank": 5,
+          "score": 0.24889862537384033,
+          "image_id": "00505.jpg",
+          "output_file": "chunk011_rank5_00505.jpg"
+        }
+      ]
+    }
+  ]
+}

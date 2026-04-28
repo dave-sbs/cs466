@@ -1,0 +1,22 @@
+{
+  "poem_name": "poem_9825",
+  "gutenberg_id": 9825,
+  "num_chunks": 2,
+  "top_k": 1,
+  "results": [
+    {
+      "chunk_index": 0,
+      "query_text": "stanza zero / line two",
+      "top_k": [
+        {"rank": 1, "score": 0.25, "image_id": "00001.jpg", "output_file": "chunk000_rank1_00001.jpg"}
+      ]
+    },
+    {
+      "chunk_index": 1,
+      "query_text": "stanza one / line two",
+      "top_k": [
+        {"rank": 1, "score": 0.23, "image_id": "00002.jpg", "output_file": "chunk001_rank1_00002.jpg"}
+      ]
+    }
+  ]
+}

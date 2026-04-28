@@ -147,13 +147,13 @@ Retrieve the top-K most visually similar images for each stanza of a poem:
 
 ```bash
 # By Gutenberg ID (prefer IDs from curation/curated_ids.csv)
-python clip_pipeline.py --step retrieve --gutenberg_id 24449
+python clip_pipeline.py --step retrieve --gutenberg_id 9825
 
 # By free-form text query
 python clip_pipeline.py --step retrieve --text "dark forest at dusk, mist rising"
 
 # With custom chunk size and top-K
-python clip_pipeline.py --step retrieve --gutenberg_id 24449 --top_k 10 --chunk_size 8
+python clip_pipeline.py --step retrieve --gutenberg_id 9825 --top_k 10 --chunk_size 8
 ```
 
 Poems are split into stanzas (or fixed-size chunks). Each chunk is encoded with CLIP's text encoder and queried against the FAISS index.
@@ -182,6 +182,79 @@ Once `poem_<id>.txt` exists, `clip_pipeline.py` will automatically prefer it as 
 
 ---
 
+### Step 4.8 — Alignment Report (corpus-scale sanity check)
+
+Before wiring poems into the dream pipeline at scale, produce a
+batch alignment summary over the curated IDs:
+
+```bash
+python -m scripts.alignment_report \
+  --ids-csv curation/curated_ids.csv \
+  --pg-raw exploration_output/pg_raw \
+  --out exploration_output/alignment_report
+# -> exploration_output/alignment_report.csv + .json
+```
+
+Each row has `{gutenberg_id, status, match_rate, stanza_count, warning}`.
+Rows with `status=failed` (e.g. **poem 24449** at `match_rate=0.9362`)
+should NOT be sent through `clip_pipeline.retrieve` because stanza
+boundaries are wrong — use poem **9825** (match_rate 1.0000, 12
+stanzas) for the MVP showcase instead.
+
+#### Tunable threshold
+
+`fetch_raw_gutenberg.py`'s `MATCH_THRESHOLD` defaults to `0.98` and can
+be lowered via the `PG_RAW_MIN_MATCH_RATE` environment variable while
+debugging:
+
+```bash
+PG_RAW_MIN_MATCH_RATE=0.90 python fetch_raw_gutenberg.py diagnose --ids 24449
+```
+
+**Do not** ship the dream video on a relaxed threshold — it produces
+mis-mapped moods. Use it only to investigate *why* a poem failed.
+
+---
+
+### Step 4.9 — Dream-pipeline Preflight
+
+Before running the GPU-heavy dream pipeline (SDXL + RIFE + FFmpeg),
+verify the data layout with the preflight CLI:
+
+```bash
+python -m dream_preflight --gutenberg-id 9825 --data-root . --json
+# → exits 0 with {"ok": true, ...} when every check passes
+```
+
+What preflight verifies:
+
+- `exploration_output/llm_analysis.jsonl` contains a record for
+  `--gutenberg-id` and passes `validate_llm_record` (scenes present,
+  mood_arc length 3, intensities in 1..5).
+- `output/retrieval_results/poem_<id>/retrieval_manifest.json` loads
+  and has the same number of chunks as `visual_scenes`.
+- Every top-1 `image_id` resolves to an existing file under
+  `data/images/`.
+
+Chunk contract note:
+
+- Retrieval and LLM analysis must agree on the exact chunking. Both are
+  expected to use **stanza splitting** when blank-line markers exist,
+  with a **fixed-size fallback** when they do not.
+- The LLM record should contain exactly one `visual_scenes` entry per
+  chunk, with sequential `stanza_index` values starting at 0.
+
+Run from Colab too — `DATA_ROOT` there is typically `/content/drive/MyDrive/...`:
+
+```bash
+python -m dream_preflight --gutenberg-id 9825 --data-root /content/drive/MyDrive/poetry_dream
+```
+
+Non-zero exit status signals at least one blocker. Use `--json` to
+parse the report from a notebook cell or shell script.
+
+---
+
 ### Step 5 — Qualitative Evaluation
 
 Generate self-contained HTML galleries for visual inspection of retrieval quality:
@@ -189,7 +262,7 @@ Generate self-contained HTML galleries for visual inspection of retrieval qualit
 ```bash
 python evaluate_retrieval.py                          # All shortlisted poems
 python evaluate_retrieval.py --top_n 5                # Top 5 from shortlist
-python evaluate_retrieval.py --ids 24449 9825 36305   # Specific poems by ID
+python evaluate_retrieval.py --ids 9825 36305         # Specific poems by ID
 python evaluate_retrieval.py --top_k 5 --chunk_size 6
 ```
 
