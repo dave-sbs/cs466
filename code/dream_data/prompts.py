@@ -16,6 +16,14 @@ DEFAULT_STYLE_PROMPT_2 = (
     "abstract generative art in the style of Refik Anadol, machine hallucination aesthetic, flowing particles and fluid simulation, data pigments suspended in volumetric mist, soft luminous gradients, painterly abstraction with photographic depth, ethereal atmospheric haze, organic morphing forms, iridescent color flow, dreamlike non-representational composition, museum installation quality, high detail, cinematic lighting, no text, no people, no faces"
 )
 
+# Lower-intensity alternative: preserves scene structure, only gently shifts mood.
+SUBTLE_STYLE_TAIL = (
+    "soft natural light, painterly mood, gentle atmosphere"
+)
+SUBTLE_STYLE_PROMPT_2 = (
+    "impressionistic oil painting, faithful to scene, naturalistic colors, soft directional lighting, delicate brushwork, subtle tonal gradients, no heavy abstraction, no surreal elements, no text, no people, no faces"
+)
+
 DEFAULT_NEGATIVE_PROMPT = (
     "photograph, photorealistic, sharp focus, hard edges, geometric, "
     "cartoon, illustration, anime, text, watermark, signature, frame, "
@@ -30,8 +38,8 @@ def _colors_str(dominant_colors: Sequence[str]) -> str:
 
 def build_sdxl_prompt(
     scene: dict[str, Any],
-    style_tail: str = DEFAULT_STYLE_TAIL,
-    style_prompt_2: str | None = DEFAULT_STYLE_PROMPT_2,
+    style_tail: str = SUBTLE_STYLE_TAIL,
+    style_prompt_2: str | None = SUBTLE_STYLE_PROMPT_2,
 ) -> tuple[str, str | None]:
     """Return ``(prompt, prompt_2)`` for an SDXL img2img call.
 
