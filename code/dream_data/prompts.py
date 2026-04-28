@@ -10,15 +10,17 @@ from typing import Any, Sequence
 
 
 DEFAULT_STYLE_TAIL = (
-    "dreamlike digital art, ethereal, high detail"
+    "hallucinated dreamscape, flowing pigments, soft atmospheric glow"
 )
 DEFAULT_STYLE_PROMPT_2 = (
-    "flowing organic textures, data-driven visualization, Refik Anadol style, 4k"
+    "abstract generative art in the style of Refik Anadol, machine hallucination aesthetic, flowing particles and fluid simulation, data pigments suspended in volumetric mist, soft luminous gradients, painterly abstraction with photographic depth, ethereal atmospheric haze, organic morphing forms, iridescent color flow, dreamlike non-representational composition, museum installation quality, high detail, cinematic lighting, no text, no people, no faces"
 )
 
 DEFAULT_NEGATIVE_PROMPT = (
-    "text, watermark, signature, blurry, low quality, photograph, "
-    "realistic face, human figure, sharp edges, geometric shapes, ui elements"
+    "photograph, photorealistic, sharp focus, hard edges, geometric, "
+    "cartoon, illustration, anime, text, watermark, signature, frame, "
+    "border, low quality, blurry, deformed, ugly, oversaturated, "
+    "flat lighting, stock photo aesthetic"
 )
 
 
