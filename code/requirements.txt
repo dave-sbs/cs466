@@ -18,6 +18,6 @@ pytest
 
 # Dream pipeline (SDXL img2img keyframes) — install only when generating
 # videos. Pinned loosely; Colab may override with newer versions.
-# diffusers>=0.27
-# accelerate>=0.29
-# safetensors>=0.4
+diffusers>=0.27
+accelerate>=0.29
+safetensors>=0.4
